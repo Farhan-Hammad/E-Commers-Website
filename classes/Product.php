@@ -47,12 +47,12 @@ class Product
     public function getBySlug($slug)
     {
         $stmt = $this->db->prepare("
-            SELECT p.*, c.name as category_name 
-            FROM {$this->table} p 
-            LEFT JOIN categories c ON p.category_id = c.id 
-            WHERE p.slug = ? AND p.status = 'active' 
-            LIMIT 1
-        ");
+        SELECT p.*, c.name as category_name, c.slug as category_slug 
+        FROM {$this->table} p 
+        LEFT JOIN categories c ON p.category_id = c.id 
+        WHERE p.slug = ? AND p.status = 'active' 
+        LIMIT 1
+    ");
         $stmt->execute([$slug]);
         return $stmt->fetch();
     }

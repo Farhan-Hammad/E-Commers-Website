@@ -118,7 +118,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 <ul class="navbar-nav mb-2 mb-lg-0">
                     <!-- Cart Icon with Badge -->
                     <li class="nav-item me-2">
-                        <a class="nav-link position-relative" href="../pages/cart.php">
+                        <a class="nav-link position-relative" href="/E-Commers-Website/pages/cart.php">
                             <i class="fas fa-shopping-cart fa-lg"></i>
                             <?php if ($cartCount > 0): ?>
                                 <span class="cart-count"><?= $cartCount ?></span>
@@ -158,19 +158,19 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                                         <hr class="dropdown-divider">
                                     </li>
                                 <?php endif; ?>
-                                <li><a class="dropdown-item text-danger" href="../logout.php">
+                                <li><a class="dropdown-item text-danger" href="/E-Commers-Website/logout.php">
                                         <i class="fas fa-sign-out-alt"></i> Logout
                                     </a></li>
                             </ul>
                         </li>
                     <?php else: ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="../login.php">
+                            <a class="nav-link" href="/E-Commers-Website/login.php">
                                 <i class="fas fa-sign-in-alt"></i> Login
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-primary btn-sm ms-2" href="../register.php">Register</a>
+                            <a class="btn btn-primary btn-sm ms-2" href="/E-Commers-Website/register.php">Register</a>
                         </li>
                     <?php endif; ?>
                 </ul>
