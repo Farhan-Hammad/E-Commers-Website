@@ -98,7 +98,7 @@ $isEmpty = $cart->isEmpty();
                             <span>Total</span>
                             <span id="cart-total">$<?= number_format($subtotal, 2) ?></span>
                         </div>
-                        <a href="checkout.php" class="btn btn-primary w-100 <?= $isEmpty ? 'disabled' : '' ?>">
+                        <a href="/E-Commers-Website/pages/checkout.php" class="btn btn-primary w-100">
                             Proceed to Checkout
                         </a>
                     </div>
