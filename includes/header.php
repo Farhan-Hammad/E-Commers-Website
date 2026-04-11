@@ -1,19 +1,20 @@
 <?php
-// Start session on every page
+// includes/header.php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Get current user if logged in
-$currentUser = null;
-if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']) {
-    $currentUser = [
-        'id' => $_SESSION['user_id'],
-        'name' => $_SESSION['user_name'],
-        'email' => $_SESSION['user_email'],
-        'is_admin' => $_SESSION['is_admin']
-    ];
-}
+// Load required classes
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../classes/User.php';
+require_once __DIR__ . '/../classes/Cart.php';
+
+$user = new User();
+$cart = new Cart();
+$cartCount = $cart->count();
+
+// Get current page for active nav highlighting
+$currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,226 +22,181 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $pageTitle ?? 'E-Commerce Store'; ?></title>
+    <title>MyStore - Your Online Shopping Destination</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../assets/css/style.css">
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
-        }
-
-        /* Header Styles */
-        .header {
-            background: #fff;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .header-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #3B82F6;
-            text-decoration: none;
-        }
-
-        .nav-menu {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-        }
-
-        .nav-menu a {
-            text-decoration: none;
-            color: #333;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        .nav-menu a:hover {
-            color: #3B82F6;
-        }
-
-        /* User Menu */
-        .user-menu {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .btn {
-            padding: 8px 20px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background: #3B82F6;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #2563EB;
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: #3B82F6;
-            border: 2px solid #3B82F6;
-        }
-
-        .btn-outline:hover {
-            background: #3B82F6;
-            color: white;
-        }
-
-        .user-dropdown {
+        /* Cart badge styling */
+        .cart-badge {
             position: relative;
         }
 
-        .user-name {
-            cursor: pointer;
-            padding: 8px 15px;
-            background: #f0f0f0;
-            border-radius: 5px;
-        }
-
-        .dropdown-content {
-            display: none;
+        .cart-count {
             position: absolute;
-            right: 0;
-            background: white;
-            min-width: 150px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            border-radius: 5px;
-            margin-top: 5px;
-        }
-
-        .dropdown-content a {
-            display: block;
-            padding: 10px 15px;
-            color: #333;
-            text-decoration: none;
-        }
-
-        .dropdown-content a:hover {
-            background: #f5f5f5;
-        }
-
-        .user-dropdown:hover .dropdown-content {
-            display: block;
-        }
-
-        /* Main Content */
-        .main-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            min-height: 500px;
-        }
-
-        /* Footer */
-        .footer {
-            background: #1F2937;
+            top: -8px;
+            right: -8px;
+            background-color: #dc3545;
             color: white;
-            padding: 40px 20px;
-            margin-top: 50px;
+            border-radius: 50%;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.7rem;
+            min-width: 18px;
+            text-align: center;
         }
 
-        .footer-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-        }
-
-        .footer-section h3 {
-            margin-bottom: 15px;
-            color: #3B82F6;
-        }
-
-        .footer-section a {
-            color: #ccc;
-            text-decoration: none;
-            display: block;
-            margin: 8px 0;
-        }
-
-        .footer-section a:hover {
+        /* User dropdown avatar */
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background-color: #0d6efd;
             color: white;
-        }
-
-        /* Alert Messages */
-        .alert {
-            padding: 12px 20px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
         }
     </style>
 </head>
 
 <body>
-    <header class="header">
-        <div class="header-container">
-            <a href="index.php" class="logo">🛒 MyStore</a>
 
-            <nav class="nav-menu">
-                <a href="index.php">Home</a>
-                <a href="products.php">Products</a>
-                <a href="cart.php">Cart (0)</a>
-            </nav>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <!-- Brand -->
+            <a class="navbar-brand fw-bold text-primary" href="../index.php">
+                <i class="fas fa-store"></i> MyStore
+            </a>
 
-            <div class="user-menu">
-                <?php if ($currentUser): ?>
-                    <div class="user-dropdown">
-                        <span class="user-name">👤 <?php echo htmlspecialchars($currentUser['name']); ?></span>
-                        <div class="dropdown-content">
-                            <a href="profile.php">My Profile</a>
-                            <a href="orders.php">My Orders</a>
-                            <?php if ($currentUser['is_admin']): ?>
-                                <a href="admin/dashboard.php">Admin Panel</a>
-                            <?php endif; ?>
-                            <a href="logout.php">Logout</a>
-                        </div>
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain"
+                aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <!-- Main Navigation Links -->
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link <?= $currentPage == 'index.php' ? 'active' : '' ?>" href="../index.php">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $currentPage == 'products.php' ? 'active' : '' ?>" href="../products.php">
+                            <i class="fas fa-tag"></i> Products
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-list"></i> Categories
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="categoriesDropdown">
+                            <?php
+                            // Fetch categories for dropdown
+                            $db = Database::getInstance()->getConnection();
+                            $catQuery = $db->query("SELECT id, name, slug FROM categories WHERE status = 1 ORDER BY name LIMIT 5");
+                            while ($cat = $catQuery->fetch(PDO::FETCH_ASSOC)):
+                            ?>
+                                <li><a class="dropdown-item" href="../products.php?category=<?= urlencode($cat['slug']) ?>">
+                                        <?= htmlspecialchars($cat['name']) ?>
+                                    </a></li>
+                            <?php endwhile; ?>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="../products.php">All Categories</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../pages/cart.php">
+                            <i class="fas fa-shopping-cart"></i> Cart
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Search Form -->
+                <form class="d-flex me-3" action="../products.php" method="GET" role="search">
+                    <div class="input-group">
+                        <input class="form-control" type="search" name="search" placeholder="Search products..."
+                            aria-label="Search" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
+                        <button class="btn btn-outline-primary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
                     </div>
-                <?php else: ?>
-                    <a href="login.php" class="btn btn-outline">Login</a>
-                    <a href="register.php" class="btn btn-primary">Register</a>
-                <?php endif; ?>
+                </form>
+
+                <!-- Right Side Icons -->
+                <ul class="navbar-nav mb-2 mb-lg-0">
+                    <!-- Cart Icon with Badge -->
+                    <li class="nav-item me-2">
+                        <a class="nav-link position-relative" href="../pages/cart.php">
+                            <i class="fas fa-shopping-cart fa-lg"></i>
+                            <?php if ($cartCount > 0): ?>
+                                <span class="cart-count"><?= $cartCount ?></span>
+                            <?php endif; ?>
+                        </a>
+                    </li>
+
+                    <!-- User Dropdown -->
+                    <?php if ($user->isLoggedIn()): ?>
+                        <?php $currentUser = $user->getCurrentUser(); ?>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
+                                role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="user-avatar me-2">
+                                    <?= strtoupper(substr($currentUser['first_name'] ?? 'U', 0, 1)) ?>
+                                </div>
+                                <span><?= htmlspecialchars($currentUser['first_name'] ?? 'User') ?></span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="../profile.php">
+                                        <i class="fas fa-user"></i> My Profile
+                                    </a></li>
+                                <li><a class="dropdown-item" href="../orders.php">
+                                        <i class="fas fa-box"></i> My Orders
+                                    </a></li>
+                                <li><a class="dropdown-item" href="../wishlist.php">
+                                        <i class="fas fa-heart"></i> Wishlist
+                                    </a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <?php if ($user->isAdmin()): ?>
+                                    <li><a class="dropdown-item" href="../admin/dashboard.php">
+                                            <i class="fas fa-cog"></i> Admin Dashboard
+                                        </a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                <?php endif; ?>
+                                <li><a class="dropdown-item text-danger" href="../logout.php">
+                                        <i class="fas fa-sign-out-alt"></i> Logout
+                                    </a></li>
+                            </ul>
+                        </li>
+                    <?php else: ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../login.php">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary btn-sm ms-2" href="../register.php">Register</a>
+                        </li>
+                    <?php endif; ?>
+                </ul>
             </div>
         </div>
-    </header>
+    </nav>
 
-    <main class="main-content">
+    <!-- Main Content Container (closing tag in footer.php) -->
+    <main>

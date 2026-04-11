@@ -60,63 +60,95 @@ class Product
     // Get all products with filters
     public function getAll($filters = [], $page = 1, $perPage = 12)
     {
+        // Handle count-only mode when second param is true (for new products.php)
+        $countOnly = ($page === true);
+
         $where = ["p.status = 'active'"];
         $params = [];
 
-        if (!empty($filters['category'])) {
+        // Category filter (supports both 'category' slug and 'category_slug')
+        $categorySlug = $filters['category_slug'] ?? $filters['category'] ?? null;
+        if (!empty($categorySlug)) {
             $where[] = "c.slug = ?";
-            $params[] = $filters['category'];
+            $params[] = $categorySlug;
         }
 
+        // Search
         if (!empty($filters['search'])) {
-            $where[] = "(p.name LIKE ? OR p.description LIKE ?)";
-            $params[] = "%{$filters['search']}%";
-            $params[] = "%{$filters['search']}%";
+            $where[] = "(p.name LIKE ? OR p.description LIKE ? OR p.short_description LIKE ?)";
+            $searchTerm = '%' . $filters['search'] . '%';
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
         }
 
-        if (!empty($filters['min_price'])) {
-            $where[] = "p.price >= ?";
-            $params[] = $filters['min_price'];
+        // Price range (handles sale price logic)
+        if (isset($filters['min_price']) && is_numeric($filters['min_price'])) {
+            $where[] = "(CASE WHEN p.sale_price IS NOT NULL AND p.sale_price < p.price THEN p.sale_price ELSE p.price END) >= ?";
+            $params[] = (float)$filters['min_price'];
         }
-
-        if (!empty($filters['max_price'])) {
-            $where[] = "p.price <= ?";
-            $params[] = $filters['max_price'];
+        if (isset($filters['max_price']) && is_numeric($filters['max_price'])) {
+            $where[] = "(CASE WHEN p.sale_price IS NOT NULL AND p.sale_price < p.price THEN p.sale_price ELSE p.price END) <= ?";
+            $params[] = (float)$filters['max_price'];
         }
 
         $whereClause = implode(' AND ', $where);
 
-        // Get total count
-        $countStmt = $this->db->prepare("
-            SELECT COUNT(*) FROM {$this->table} p 
-            LEFT JOIN categories c ON p.category_id = c.id 
-            WHERE $whereClause
-        ");
+        // --- COUNT QUERY (if countOnly or we need total for pagination) ---
+        $countSql = "SELECT COUNT(*) FROM {$this->table} p LEFT JOIN categories c ON p.category_id = c.id WHERE $whereClause";
+        $countStmt = $this->db->prepare($countSql);
         $countStmt->execute($params);
         $total = $countStmt->fetchColumn();
 
-        // Get products
-        $offset = ($page - 1) * $perPage;
-        $orderBy = !empty($filters['sort']) && $filters['sort'] === 'price'
-            ? 'p.price ASC'
-            : 'p.created_at DESC';
+        if ($countOnly) {
+            return $total;
+        }
 
-        $stmt = $this->db->prepare("
-            SELECT p.*, c.name as category_name 
+        // --- SORTING ---
+        $sort = $filters['sort'] ?? 'newest';
+        $orderBy = match ($sort) {
+            'price_asc'  => "(CASE WHEN p.sale_price IS NOT NULL AND p.sale_price < p.price THEN p.sale_price ELSE p.price END) ASC",
+            'price_desc' => "(CASE WHEN p.sale_price IS NOT NULL AND p.sale_price < p.price THEN p.sale_price ELSE p.price END) DESC",
+            'name_asc'   => "p.name ASC",
+            'name_desc'  => "p.name DESC",
+            default      => "p.created_at DESC"
+        };
+
+        // --- PAGINATION ---
+        // Support both new style (limit/offset) and old style (page/perPage)
+        if (isset($filters['limit'])) {
+            $limit = (int)$filters['limit'];
+            $offset = (int)($filters['offset'] ?? 0);
+        } else {
+            $page = max(1, (int)$page);
+            $perPage = max(1, (int)$perPage);
+            $limit = $perPage;
+            $offset = ($page - 1) * $perPage;
+        }
+
+        // --- MAIN QUERY ---
+        $sql = "SELECT p.*, c.name as category_name, c.slug as category_slug 
             FROM {$this->table} p 
             LEFT JOIN categories c ON p.category_id = c.id 
             WHERE $whereClause 
             ORDER BY $orderBy 
-            LIMIT ? OFFSET ?
-        ");
-        $stmt->execute(array_merge($params, [$perPage, $offset]));
+            LIMIT ? OFFSET ?";
 
-        return [
-            'products' => $stmt->fetchAll(),
-            'total' => $total,
-            'pages' => ceil($total / $perPage),
-            'current_page' => $page
-        ];
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(array_merge($params, [$limit, $offset]));
+        $products = $stmt->fetchAll();
+
+        // For backward compatibility with old calling style that expects array with pagination info
+        if (!isset($filters['limit']) && func_num_args() >= 2) {
+            return [
+                'products'      => $products,
+                'total'         => $total,
+                'pages'         => ceil($total / $perPage),
+                'current_page'  => $page
+            ];
+        }
+
+        return $products;
     }
 
     // Create product (admin)

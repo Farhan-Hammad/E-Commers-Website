@@ -100,8 +100,10 @@ class User
             return ['success' => false, 'message' => "Invalid email or password"];
         }
 
-        // Start session and store user data
-        session_start();
+        // Start session if not already started
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_email'] = $user['email'];
         $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
@@ -124,7 +126,9 @@ class User
 
     public function logout()
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         session_unset();
         session_destroy();
         return ['success' => true, 'message' => "Logged out successfully"];
@@ -134,13 +138,17 @@ class User
 
     public function isLoggedIn()
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         return isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
     }
 
     public function isAdmin()
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         return isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
     }
 
