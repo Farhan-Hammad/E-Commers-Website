@@ -3,6 +3,7 @@ $pageTitle = 'Home - MyStore';
 require_once 'includes/header.php';
 require_once 'classes/Product.php';
 
+
 // Get featured products
 $product = new Product();
 $featuredProducts = $product->getFeatured(8);
