@@ -47,13 +47,27 @@ class Product
     public function getBySlug($slug)
     {
         $stmt = $this->db->prepare("
-        SELECT p.*, c.name as category_name, c.slug as category_slug 
-        FROM {$this->table} p 
-        LEFT JOIN categories c ON p.category_id = c.id 
-        WHERE p.slug = ? AND p.status = 'active' 
-        LIMIT 1
-    ");
+            SELECT p.*, c.name as category_name, c.slug as category_slug 
+            FROM {$this->table} p 
+            LEFT JOIN categories c ON p.category_id = c.id 
+            WHERE p.slug = ? AND p.status = 'active' 
+            LIMIT 1
+        ");
         $stmt->execute([$slug]);
+        return $stmt->fetch();
+    }
+
+    // Get single product by ID (for admin edit form)
+    public function getById($id)
+    {
+        $stmt = $this->db->prepare("
+            SELECT p.*, c.name as category_name, c.slug as category_slug 
+            FROM {$this->table} p 
+            LEFT JOIN categories c ON p.category_id = c.id 
+            WHERE p.id = ?
+            LIMIT 1
+        ");
+        $stmt->execute([$id]);
         return $stmt->fetch();
     }
 
