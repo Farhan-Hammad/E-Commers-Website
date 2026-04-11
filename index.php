@@ -2,7 +2,7 @@
 $pageTitle = 'Home - MyStore';
 require_once 'includes/header.php';
 require_once 'classes/Product.php';
-// Get featured products
+
 $product = new Product();
 $featuredProducts = $product->getFeatured(8);
 $newArrivals = $product->getNewArrivals(4);
@@ -224,7 +224,7 @@ $newArrivals = $product->getNewArrivals(4);
 <section class="hero">
     <h1>🛍️ Welcome to MyStore</h1>
     <p>Discover amazing products at unbeatable prices</p>
-    <a href="products.php" class="hero-btn">Shop Now →</a>
+    <a href="pages/products.php" class="hero-btn">Shop Now →</a>
 </section>
 
 <!-- Features -->
@@ -254,23 +254,23 @@ $newArrivals = $product->getNewArrivals(4);
 <!-- Categories -->
 <div class="section-header">
     <h2>📂 Shop by Category</h2>
-    <a href="products.php" class="view-all">View All →</a>
+    <a href="pages/products.php" class="view-all">View All →</a>
 </div>
 
 <div class="categories">
-    <a href="products.php?category=electronics" class="category-card">
+    <a href="pages/products.php?category=electronics" class="category-card">
         <div class="category-icon">💻</div>
         <h3>Electronics</h3>
     </a>
-    <a href="products.php?category=fashion" class="category-card">
+    <a href="pages/products.php?category=fashion" class="category-card">
         <div class="category-icon">👕</div>
         <h3>Fashion</h3>
     </a>
-    <a href="products.php?category=home" class="category-card">
+    <a href="pages/products.php?category=home" class="category-card">
         <div class="category-icon">🏠</div>
         <h3>Home & Living</h3>
     </a>
-    <a href="products.php?category=sports" class="category-card">
+    <a href="pages/products.php?category=sports" class="category-card">
         <div class="category-icon">⚽</div>
         <h3>Sports</h3>
     </a>
@@ -279,7 +279,7 @@ $newArrivals = $product->getNewArrivals(4);
 <!-- Featured Products -->
 <div class="section-header">
     <h2>⭐ Featured Products</h2>
-    <a href="products.php?featured=1" class="view-all">View All →</a>
+    <a href="pages/products.php?featured=1" class="view-all">View All →</a>
 </div>
 
 <div class="product-grid">
@@ -288,7 +288,7 @@ $newArrivals = $product->getNewArrivals(4);
             <div class="product-image">📦</div>
             <div class="product-info">
                 <span class="product-category"><?php echo htmlspecialchars($p['category_name'] ?? 'General'); ?></span>
-                <a href="product.php?slug=<?php echo $p['slug']; ?>" class="product-name">
+                <a href="pages/product-detail.php?slug=<?php echo $p['slug']; ?>" class="product-name">
                     <?php echo htmlspecialchars($p['name']); ?>
                 </a>
                 <div class="product-price">
@@ -297,7 +297,7 @@ $newArrivals = $product->getNewArrivals(4);
                         <span class="old-price">$<?php echo number_format($p['price'], 2); ?></span>
                     <?php endif; ?>
                 </div>
-                <button class="add-to-cart" onclick="addToCart(<?php echo $p['id']; ?>)">
+                <button class="add-to-cart" data-product-id="<?= $p['id'] ?>">
                     🛒 Add to Cart
                 </button>
             </div>
@@ -314,7 +314,7 @@ $newArrivals = $product->getNewArrivals(4);
 <!-- New Arrivals -->
 <div class="section-header">
     <h2>🆕 New Arrivals</h2>
-    <a href="products.php?sort=newest" class="view-all">View All →</a>
+    <a href="pages/products.php?sort=newest" class="view-all">View All →</a>
 </div>
 
 <div class="product-grid">
@@ -323,13 +323,13 @@ $newArrivals = $product->getNewArrivals(4);
             <div class="product-image">📦</div>
             <div class="product-info">
                 <span class="product-category"><?php echo htmlspecialchars($p['category_name'] ?? 'General'); ?></span>
-                <a href="product.php?slug=<?php echo $p['slug']; ?>" class="product-name">
+                <a href="pages/product-detail.php?slug=<?php echo $p['slug']; ?>" class="product-name">
                     <?php echo htmlspecialchars($p['name']); ?>
                 </a>
                 <div class="product-price">
                     <span class="price">$<?php echo number_format($p['price'], 2); ?></span>
                 </div>
-                <button class="add-to-cart" onclick="addToCart.call(this, <?php echo $p['id']; ?>)">
+                <button class="add-to-cart" data-product-id="<?= $p['id'] ?>">
                     🛒 Add to Cart
                 </button>
             </div>
@@ -338,7 +338,7 @@ $newArrivals = $product->getNewArrivals(4);
 </div>
 
 <script>
-    // Real cart add function (same as products.php)
+    // Real cart add function
     function showToast(message, type = 'success') {
         let container = document.getElementById('toast-container');
         if (!container) {
@@ -367,40 +367,42 @@ $newArrivals = $product->getNewArrivals(4);
         }
     }
 
-    async function addToCart(productId) {
-        const btn = event.currentTarget;
-        const originalText = btn.innerHTML;
+    document.querySelectorAll('.add-to-cart').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const productId = this.dataset.productId;
+            const originalText = this.innerHTML;
 
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Adding...';
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Adding...';
 
-        try {
-            const response = await fetch('api/cart/add.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    product_id: productId,
-                    quantity: 1
-                })
-            });
-            const result = await response.json();
+            try {
+                const response = await fetch('api/cart/add.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        quantity: 1
+                    })
+                });
+                const result = await response.json();
 
-            if (result.success) {
-                showToast(result.message || 'Item added to cart!', 'success');
-                updateCartCount(result.cart_count);
-            } else {
-                showToast(result.message || 'Could not add item', 'danger');
+                if (result.success) {
+                    showToast(result.message || 'Item added to cart!', 'success');
+                    updateCartCount(result.cart_count);
+                } else {
+                    showToast(result.message || 'Could not add item', 'danger');
+                }
+            } catch (error) {
+                console.error('Cart error:', error);
+                showToast('Something went wrong. Please try again.', 'danger');
+            } finally {
+                this.disabled = false;
+                this.innerHTML = originalText;
             }
-        } catch (error) {
-            console.error('Cart error:', error);
-            showToast('Something went wrong. Please try again.', 'danger');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = originalText;
-        }
-    }
+        });
+    });
 </script>
 
 <?php require_once 'includes/footer.php'; ?>

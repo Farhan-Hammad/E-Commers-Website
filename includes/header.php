@@ -71,7 +71,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
         <div class="container">
             <!-- Brand -->
-            <a class="navbar-brand fw-bold text-primary" href="../index.php">
+            <a class="navbar-brand fw-bold text-primary" href="/E-Commers-Website/index.php">
                 <i class="fas fa-store"></i> MyStore
             </a>
 
@@ -83,48 +83,28 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
             <div class="collapse navbar-collapse" id="navbarMain">
                 <!-- Main Navigation Links -->
+                <!-- Main Navigation Links -->
                 <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link <?= $currentPage == 'index.php' ? 'active' : '' ?>" href="../index.php">
+                        <a class="nav-link <?= $currentPage == 'index.php' ? 'active' : '' ?>" href="/E-Commers-Website/index.php">
                             <i class="fas fa-home"></i> Home
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <?= $currentPage == 'products.php' ? 'active' : '' ?>" href="../products.php">
+                        <a class="nav-link <?= $currentPage == 'products.php' ? 'active' : '' ?>" href="/E-Commers-Website/pages/products.php">
                             <i class="fas fa-tag"></i> Products
                         </a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-list"></i> Categories
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="categoriesDropdown">
-                            <?php
-                            // Fetch categories for dropdown
-                            $db = Database::getInstance()->getConnection();
-                            $catQuery = $db->query("SELECT id, name, slug FROM categories WHERE status = 1 ORDER BY name LIMIT 5");
-                            while ($cat = $catQuery->fetch(PDO::FETCH_ASSOC)):
-                            ?>
-                                <li><a class="dropdown-item" href="../products.php?category=<?= urlencode($cat['slug']) ?>">
-                                        <?= htmlspecialchars($cat['name']) ?>
-                                    </a></li>
-                            <?php endwhile; ?>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="../products.php">All Categories</a></li>
-                        </ul>
-                    </li>
+                    <!-- ... -->
                     <li class="nav-item">
-                        <a class="nav-link" href="../pages/cart.php">
+                        <a class="nav-link" href="/E-Commers-Website/pages/cart.php">
                             <i class="fas fa-shopping-cart"></i> Cart
                         </a>
                     </li>
                 </ul>
 
                 <!-- Search Form -->
-                <form class="d-flex me-3" action="../products.php" method="GET" role="search">
+                <form class="d-flex me-3" action="/E-Commers-Website/pages/products.php" method="GET" role="search">
                     <div class="input-group">
                         <input class="form-control" type="search" name="search" placeholder="Search products..."
                             aria-label="Search" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">

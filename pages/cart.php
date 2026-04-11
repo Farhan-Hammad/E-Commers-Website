@@ -40,7 +40,7 @@ $isEmpty = $cart->isEmpty();
                                                     style="width: 60px; height: 60px; object-fit: cover;"
                                                     class="me-3 rounded">
                                                 <div>
-                                                    <a href="../product.php?slug=<?= urlencode($item['slug']) ?>"
+                                                    <a href="product-detail.php?slug=<?= urlencode($item['slug']) ?>"
                                                         class="text-decoration-none">
                                                         <h6 class="mb-0"><?= htmlspecialchars($item['name']) ?></h6>
                                                     </a>
@@ -71,7 +71,7 @@ $isEmpty = $cart->isEmpty();
                 </div>
 
                 <div class="mt-3">
-                    <a href="../products.php" class="btn btn-outline-primary">
+                    <a href="products.php" class="btn btn-outline-primary">
                         <i class="fas fa-arrow-left"></i> Continue Shopping
                     </a>
                 </div>
@@ -184,7 +184,6 @@ $isEmpty = $cart->isEmpty();
                 });
                 const result = await response.json();
                 if (result.success) {
-                    // Update subtotal for this row
                     const row = document.querySelector(`tr[data-product-id="${productId}"]`);
                     const price = parseFloat(row.querySelector('td:nth-child(2)').textContent.replace('$', ''));
                     const subtotal = price * quantity;
