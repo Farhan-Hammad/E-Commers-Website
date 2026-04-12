@@ -4,7 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Load required classes
+// Load required classes using absolute paths
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../classes/User.php';
 require_once __DIR__ . '/../classes/Cart.php';
@@ -151,7 +151,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                                     <hr class="dropdown-divider">
                                 </li>
                                 <?php if ($user->isAdmin()): ?>
-                                    <li><a class="dropdown-item" href="../admin/dashboard.php">
+                                    <li><a class="dropdown-item" href="/E-Commers-Website/admin/dashboard.php">
                                             <i class="fas fa-cog"></i> Admin Dashboard
                                         </a></li>
                                     <li>

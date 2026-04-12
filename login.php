@@ -11,14 +11,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = new User();
     $result = $user->login($_POST['email'] ?? '', $_POST['password'] ?? '');
 
+
     $message = $result['message'];
     $messageType = $result['success'] ? 'success' : 'error';
 
     // Redirect immediately on success
     if ($result['success']) {
-        $redirect = $result['user']['is_admin'] ? 'admin/dashboard.php' : 'index.php';
-        header("Location: $redirect");
-        exit; // STOP execution
+        $redirect = $result['user']['is_admin'] ? '/E-Commers-Website/admin/dashboard.php' : '/E-Commers-Website/index.php';
+        echo '<meta http-equiv="refresh" content="0;url=' . $redirect . '">';
+        exit;
     }
 }
 

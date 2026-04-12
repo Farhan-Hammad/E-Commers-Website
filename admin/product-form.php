@@ -1,15 +1,13 @@
 <?php
 require_once 'auth_check.php';
 require_once '../classes/Product.php';
-require_once '../classes/Database.php';
 require_once '../includes/header.php';
 
 $productObj = new Product();
-$db = Database::getInstance()->getConnection();
+$db = db(); // Use global db() helper
 
 // Get categories for dropdown
 $categories = $db->query("SELECT id, name FROM categories ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
-
 $isEdit = isset($_GET['id']);
 $product = $isEdit ? $productObj->getById($_GET['id']) : null;
 

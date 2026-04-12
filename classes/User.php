@@ -81,13 +81,16 @@ class User
 
     public function login($email, $password)
     {
-        // Validate input
+        // Trim and validate input
+        $email = trim($email);
+        $password = trim($password);
+
         if (empty($email) || empty($password)) {
             return ['success' => false, 'message' => "Email and password are required"];
         }
 
-        // Find user by email
-        $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE email = ? LIMIT 1");
+        // Case‑insensitive email search
+        $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE LOWER(email) = LOWER(?) LIMIT 1");
         $stmt->execute([$email]);
         $user = $stmt->fetch();
 
@@ -100,7 +103,7 @@ class User
             return ['success' => false, 'message' => "Invalid email or password"];
         }
 
-        // Start session if not already started
+        // Start session
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -149,7 +152,7 @@ class User
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        return isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+        return isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === 1;
     }
 
     public function getCurrentUser()

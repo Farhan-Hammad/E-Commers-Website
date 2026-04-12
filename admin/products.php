@@ -4,7 +4,7 @@ require_once '../classes/Product.php';
 require_once '../includes/header.php';
 
 $productObj = new Product();
-$db = Database::getInstance()->getConnection();
+$db = db(); // Use global db() helper
 
 // Handle delete
 if (isset($_GET['delete'])) {
@@ -24,6 +24,7 @@ $totalPages = ceil($totalProducts / $perPage);
 // Get categories for dropdown
 $categories = $db->query("SELECT id, name FROM categories ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 ?>
+<!-- rest of file unchanged -->
 
 <div class="container-fluid">
     <div class="row">

@@ -8,7 +8,8 @@ class Cart
 
     public function __construct()
     {
-        $this->db = Database::getInstance()->getConnection();
+        // Use the global db() function from config/database.php
+        $this->db = db();
         if (!isset($_SESSION[$this->sessionKey])) {
             $_SESSION[$this->sessionKey] = [];
         }

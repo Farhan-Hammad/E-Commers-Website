@@ -12,6 +12,7 @@ if (!$order) {
     exit;
 }
 ?>
+<!-- rest of file unchanged (no db call needed here) -->
 
 <div class="container-fluid">
     <div class="row">

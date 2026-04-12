@@ -1,9 +1,8 @@
 <?php
 require_once 'auth_check.php';
-require_once '../classes/Database.php';
 require_once '../includes/header.php';
 
-$db = Database::getInstance()->getConnection();
+$db = db(); // Use the global db() function
 
 // Get stats
 $totalOrders = $db->query("SELECT COUNT(*) FROM orders")->fetchColumn();
@@ -20,6 +19,7 @@ $recentOrders = $db->query("
     LIMIT 5
 ")->fetchAll(PDO::FETCH_ASSOC);
 ?>
+<!-- rest of file unchanged -->
 
 <div class="container-fluid">
     <div class="row">
