@@ -158,7 +158,7 @@ $products = $product->getAll($filters); // returns plain array of products
                             <div class="card h-100 product-card shadow-sm">
                                 <?php
                                 $images = json_decode($prod['images'] ?? '[]', true);
-                                $firstImage = !empty($images) ? $images[0] : '../assets/images/placeholder.jpg';
+                                $firstImage = !empty($images) ? $images[0] : '/E-Commers-Website/assets/images/placeholder.jpg';
                                 ?>
                                 <a href="product-detail.php?slug=<?= urlencode($prod['slug']) ?>">
                                     <img src="<?= htmlspecialchars($firstImage) ?>"

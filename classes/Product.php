@@ -169,10 +169,10 @@ class Product
     public function create($data)
     {
         $stmt = $this->db->prepare("
-            INSERT INTO {$this->table} 
-            (category_id, name, slug, description, short_description, price, sale_price, stock_quantity, sku, status, featured) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ");
+        INSERT INTO {$this->table} 
+        (category_id, name, slug, description, short_description, price, sale_price, stock_quantity, sku, status, featured, images) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
 
         $stmt->execute([
             $data['category_id'],
@@ -185,7 +185,8 @@ class Product
             $data['stock_quantity'] ?? 0,
             $data['sku'],
             $data['status'] ?? 'active',
-            $data['featured'] ?? false
+            $data['featured'] ?? false,
+            $data['images'] ?? null
         ]);
 
         return $this->db->lastInsertId();

@@ -285,7 +285,13 @@ $newArrivals = $product->getNewArrivals(4);
 <div class="product-grid">
     <?php foreach ($featuredProducts as $p): ?>
         <div class="product-card">
-            <div class="product-image">📦</div>
+            <?php
+            $images = json_decode($p['images'] ?? '[]', true);
+            $firstImage = !empty($images) ? $images[0] : '/E-Commers-Website/assets/images/placeholder.jpg';
+            ?>
+            <img src="<?= htmlspecialchars($firstImage) ?>"
+                alt="<?= htmlspecialchars($p['name']) ?>"
+                style="width: 100%; height: 200px; object-fit: cover;">
             <div class="product-info">
                 <span class="product-category"><?php echo htmlspecialchars($p['category_name'] ?? 'General'); ?></span>
                 <a href="pages/product-detail.php?slug=<?php echo $p['slug']; ?>" class="product-name">
@@ -320,7 +326,13 @@ $newArrivals = $product->getNewArrivals(4);
 <div class="product-grid">
     <?php foreach ($newArrivals as $p): ?>
         <div class="product-card">
-            <div class="product-image">📦</div>
+            <?php
+            $images = json_decode($p['images'] ?? '[]', true);
+            $firstImage = !empty($images) ? $images[0] : '/E-Commers-Website/assets/images/placeholder.jpg';
+            ?>
+            <img src="<?= htmlspecialchars($firstImage) ?>"
+                alt="<?= htmlspecialchars($p['name']) ?>"
+                style="width: 100%; height: 200px; object-fit: cover;">
             <div class="product-info">
                 <span class="product-category"><?php echo htmlspecialchars($p['category_name'] ?? 'General'); ?></span>
                 <a href="pages/product-detail.php?slug=<?php echo $p['slug']; ?>" class="product-name">

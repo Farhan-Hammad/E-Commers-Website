@@ -138,13 +138,13 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                                 <span><?= htmlspecialchars($currentUser['first_name'] ?? 'User') ?></span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="../profile.php">
+                                <li><a class="dropdown-item" href="/E-Commers-Website/profile.php">
                                         <i class="fas fa-user"></i> My Profile
                                     </a></li>
-                                <li><a class="dropdown-item" href="../orders.php">
+                                <li><a class="dropdown-item" href="/E-Commers-Website/orders.php">
                                         <i class="fas fa-box"></i> My Orders
                                     </a></li>
-                                <li><a class="dropdown-item" href="../wishlist.php">
+                                <li><a class="dropdown-item" href="/E-Commers-Website/wishlist.php">
                                         <i class="fas fa-heart"></i> Wishlist
                                     </a></li>
                                 <li>
