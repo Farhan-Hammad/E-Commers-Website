@@ -196,90 +196,96 @@ $mainImage = $images[0];
 </div>
 
 <script>
-    // Add to Cart functionality
-    function showToast(message, type = 'success') {
-        let container = document.getElementById('toast-container');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'toast-container';
-            container.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;';
-            document.body.appendChild(container);
-        }
-        const toast = document.createElement('div');
-        toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
-        toast.style.minWidth = '250px';
-        toast.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-    }
+    (function() {
+        // Prevent multiple initializations
+        if (window.__cartListenerAdded) return;
+        window.__cartListenerAdded = true;
 
-    function updateCartCount(count) {
-        const cartBadge = document.querySelector('.cart-count');
-        if (cartBadge) {
-            cartBadge.textContent = count;
-            cartBadge.style.display = count > 0 ? 'inline-block' : 'none';
-        }
-    }
-
-    async function addToCart(productId, quantity = 1) {
-        try {
-            const response = await fetch('/E-Commers-Website/api/cart/add.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    product_id: productId,
-                    quantity: quantity
-                })
-            });
-            const result = await response.json();
-            if (result.success) {
-                showToast(result.message || 'Item added to cart!', 'success');
-                updateCartCount(result.cart_count);
-            } else {
-                showToast(result.message || 'Could not add item', 'danger');
+        // Toast helper
+        function showToast(message, type = 'success') {
+            let container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                container.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;';
+                document.body.appendChild(container);
             }
-        } catch (error) {
-            showToast('Something went wrong. Please try again.', 'danger');
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+            toast.style.minWidth = '250px';
+            toast.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
-    }
 
-    // Main Add to Cart button
-    document.querySelector('.add-to-cart-btn').addEventListener('click', async function() {
-        const productId = this.dataset.productId;
-        const quantity = parseInt(document.getElementById('quantity').value);
-        const btn = this;
-        const originalText = btn.innerHTML;
+        // Update cart badge
+        function updateCartCount(count) {
+            const cartBadge = document.querySelector('.cart-count');
+            if (cartBadge) {
+                cartBadge.textContent = count;
+                cartBadge.style.display = count > 0 ? 'inline-block' : 'none';
+            }
+        }
 
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Adding...';
+        // Global click listener using event delegation
+        document.addEventListener('click', async function(e) {
+            const addBtn = e.target.closest('.add-to-cart');
+            if (!addBtn) return;
 
-        await addToCart(productId, quantity);
+            e.preventDefault();
 
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-    });
+            // Don't proceed if already disabled (prevents double clicks)
+            if (addBtn.disabled) return;
 
-    // Related products Add to Cart buttons
-    document.querySelectorAll('.add-to-cart').forEach(btn => {
-        btn.addEventListener('click', async function() {
-            const productId = this.dataset.productId;
-            const btn = this;
-            const originalHtml = btn.innerHTML;
+            const productId = addBtn.dataset.productId;
+            if (!productId) return;
 
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+            // Get quantity if exists (for product detail page)
+            const quantityInput = document.getElementById('quantity');
+            const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
 
-            await addToCart(productId, 1);
+            const originalHtml = addBtn.innerHTML;
+            addBtn.disabled = true;
+            addBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Adding...';
 
-            btn.disabled = false;
-            btn.innerHTML = originalHtml;
+            try {
+                const response = await fetch('/E-Commers-Website/api/cart/add.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        quantity: quantity
+                    })
+                });
+                const result = await response.json();
+
+                if (response.status === 401) {
+                    showToast('Please log in to add items to cart', 'danger');
+                    setTimeout(() => window.location.href = '/E-Commers-Website/login.php', 1500);
+                    // Keep button disabled during redirect
+                    return;
+                }
+
+                if (result.success) {
+                    showToast(result.message || 'Item added to cart!', 'success');
+                    updateCartCount(result.cart_count);
+                } else {
+                    showToast(result.message || 'Could not add item', 'danger');
+                }
+            } catch (error) {
+                console.error('Cart error:', error);
+                showToast('Something went wrong. Please try again.', 'danger');
+            } finally {
+                // Reset button state (if not redirecting)
+                if (addBtn.disabled) {
+                    addBtn.disabled = false;
+                    addBtn.innerHTML = originalHtml;
+                }
+            }
         });
-    });
+    })();
 </script>
 
 <?php require_once '../includes/footer.php'; ?>

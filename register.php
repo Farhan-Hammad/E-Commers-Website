@@ -2,6 +2,12 @@
 // MUST BE FIRST - No output before this!
 require_once 'classes/User.php';
 
+$user = new User();
+if ($user->isLoggedIn()) {
+    header('Location: /E-Commers-Website/index.php');
+    exit;
+}
+
 $pageTitle = 'Register - MyStore';
 $message = '';
 $messageType = '';

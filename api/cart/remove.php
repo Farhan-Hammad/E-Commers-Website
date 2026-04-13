@@ -1,5 +1,13 @@
 <?php
 session_start();
+
+require_once '../../classes/User.php';
+$user = new User();
+if (!$user->isLoggedIn()) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Please log in']);
+    exit;
+}
 require_once '../../config/database.php';
 require_once '../../classes/Cart.php';
 

@@ -1,4 +1,11 @@
 <?php
+require_once '../classes/User.php';
+
+$user = new User();
+if (!$user->isLoggedIn()) {
+    header('Location: /E-Commers-Website/login.php');
+    exit;
+}
 require_once '../includes/header.php';
 require_once '../classes/Cart.php';
 

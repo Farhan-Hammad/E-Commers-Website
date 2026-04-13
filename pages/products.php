@@ -239,55 +239,77 @@ $products = $product->getAll($filters); // returns plain array of products
 </div>
 
 <script>
-    // Cart functionality with toast notifications
-    function showToast(message, type = 'success') {
-        let container = document.getElementById('toast-container');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'toast-container';
-            container.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;';
-            document.body.appendChild(container);
+    (function() {
+        // Prevent multiple initializations
+        if (window.__cartListenerAdded) return;
+        window.__cartListenerAdded = true;
+
+        // Toast helper
+        function showToast(message, type = 'success') {
+            let container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                container.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;';
+                document.body.appendChild(container);
+            }
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+            toast.style.minWidth = '250px';
+            toast.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
 
-        const toast = document.createElement('div');
-        toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
-        toast.style.minWidth = '250px';
-        toast.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-    }
-
-    function updateCartCount(count) {
-        const cartBadge = document.querySelector('.cart-count');
-        if (cartBadge) {
-            cartBadge.textContent = count;
-            cartBadge.style.display = count > 0 ? 'inline-block' : 'none';
+        // Update cart badge
+        function updateCartCount(count) {
+            const cartBadge = document.querySelector('.cart-count');
+            if (cartBadge) {
+                cartBadge.textContent = count;
+                cartBadge.style.display = count > 0 ? 'inline-block' : 'none';
+            }
         }
-    }
 
-    document.querySelectorAll('.add-to-cart').forEach(btn => {
-        btn.addEventListener('click', async function() {
-            const productId = this.dataset.productId;
-            const originalText = this.innerHTML;
+        // Global click listener using event delegation
+        document.addEventListener('click', async function(e) {
+            const addBtn = e.target.closest('.add-to-cart');
+            if (!addBtn) return;
 
-            this.disabled = true;
-            this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Adding...';
+            e.preventDefault();
+
+            // Don't proceed if already disabled (prevents double clicks)
+            if (addBtn.disabled) return;
+
+            const productId = addBtn.dataset.productId;
+            if (!productId) return;
+
+            // Get quantity if exists (for product detail page)
+            const quantityInput = document.getElementById('quantity');
+            const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+
+            const originalHtml = addBtn.innerHTML;
+            addBtn.disabled = true;
+            addBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Adding...';
 
             try {
-                const response = await fetch('../api/cart/add.php', {
+                const response = await fetch('/E-Commers-Website/api/cart/add.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         product_id: productId,
-                        quantity: 1
+                        quantity: quantity
                     })
                 });
                 const result = await response.json();
+
+                if (response.status === 401) {
+                    showToast('Please log in to add items to cart', 'danger');
+                    setTimeout(() => window.location.href = '/E-Commers-Website/login.php', 1500);
+                    // Keep button disabled during redirect
+                    return;
+                }
 
                 if (result.success) {
                     showToast(result.message || 'Item added to cart!', 'success');
@@ -299,11 +321,14 @@ $products = $product->getAll($filters); // returns plain array of products
                 console.error('Cart error:', error);
                 showToast('Something went wrong. Please try again.', 'danger');
             } finally {
-                this.disabled = false;
-                this.innerHTML = originalText;
+                // Reset button state (if not redirecting)
+                if (addBtn.disabled) {
+                    addBtn.disabled = false;
+                    addBtn.innerHTML = originalHtml;
+                }
             }
         });
-    });
+    })();
 </script>
 
 <?php require_once '../includes/footer.php'; ?>

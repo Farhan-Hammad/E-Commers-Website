@@ -2,8 +2,17 @@
 session_start();
 require_once '../../config/database.php';
 require_once '../../classes/Cart.php';
+require_once '../../classes/User.php';
 
 header('Content-Type: application/json');
+
+// Check if user is logged in
+$user = new User();
+if (!$user->isLoggedIn()) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Please log in to add items to cart']);
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
