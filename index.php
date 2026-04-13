@@ -218,6 +218,76 @@ $newArrivals = $product->getNewArrivals(4);
     .feature p {
         color: #666;
     }
+
+    /* Product Carousel */
+    .product-carousel-container {
+        position: relative;
+        margin-bottom: 50px;
+    }
+
+    .product-carousel {
+        display: flex;
+        gap: 20px;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        scrollbar-width: none;
+        /* Firefox */
+        -ms-overflow-style: none;
+        /* IE/Edge */
+        padding: 10px 5px;
+    }
+
+    .product-carousel::-webkit-scrollbar {
+        display: none;
+        /* Chrome/Safari */
+    }
+
+    .carousel-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 45px;
+        height: 45px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+        border: 1px solid #e0e0e0;
+        transition: all 0.2s;
+    }
+
+    .carousel-arrow:hover {
+        background: #3B82F6;
+        color: white;
+        border-color: #3B82F6;
+    }
+
+    .carousel-arrow-left {
+        left: -20px;
+    }
+
+    .carousel-arrow-right {
+        right: -20px;
+    }
+
+    @media (max-width: 768px) {
+        .carousel-arrow {
+            width: 35px;
+            height: 35px;
+        }
+
+        .carousel-arrow-left {
+            left: -10px;
+        }
+
+        .carousel-arrow-right {
+            right: -10px;
+        }
+    }
 </style>
 
 <!-- Hero Section -->
@@ -277,44 +347,47 @@ $newArrivals = $product->getNewArrivals(4);
 </div>
 
 <!-- Featured Products -->
+<!-- Featured Products -->
 <div class="section-header">
     <h2>⭐ Featured Products</h2>
     <a href="pages/products.php?featured=1" class="view-all">View All →</a>
 </div>
 
-<div class="product-grid">
-    <?php foreach ($featuredProducts as $p): ?>
-        <div class="product-card">
-            <?php
-            $images = json_decode($p['images'] ?? '[]', true);
-            $firstImage = !empty($images) ? $images[0] : '/E-Commers-Website/assets/images/placeholder.jpg';
-            ?>
-            <img src="<?= htmlspecialchars($firstImage) ?>"
-                alt="<?= htmlspecialchars($p['name']) ?>"
-                style="width: 100%; height: 200px; object-fit: cover;">
-            <div class="product-info">
-                <span class="product-category"><?php echo htmlspecialchars($p['category_name'] ?? 'General'); ?></span>
-                <a href="pages/product-detail.php?slug=<?php echo $p['slug']; ?>" class="product-name">
-                    <?php echo htmlspecialchars($p['name']); ?>
-                </a>
-                <div class="product-price">
-                    <span class="price">$<?php echo number_format($p['price'], 2); ?></span>
-                    <?php if ($p['sale_price']): ?>
-                        <span class="old-price">$<?php echo number_format($p['price'], 2); ?></span>
-                    <?php endif; ?>
+<div class="product-carousel-container">
+    <div class="carousel-arrow carousel-arrow-left" id="featuredLeftArrow">
+        <i class="fas fa-chevron-left"></i>
+    </div>
+    <div class="product-carousel" id="featuredCarousel">
+        <?php foreach ($featuredProducts as $p): ?>
+            <div class="product-card" style="min-width: 250px; flex: 0 0 auto;">
+                <?php
+                $images = json_decode($p['images'] ?? '[]', true);
+                $firstImage = !empty($images) ? $images[0] : '/E-Commers-Website/assets/images/placeholder.jpg';
+                ?>
+                <img src="<?= htmlspecialchars($firstImage) ?>"
+                    alt="<?= htmlspecialchars($p['name']) ?>"
+                    style="width: 100%; height: 200px; object-fit: cover;">
+                <div class="product-info">
+                    <span class="product-category"><?= htmlspecialchars($p['category_name'] ?? 'General') ?></span>
+                    <a href="pages/product-detail.php?slug=<?= $p['slug'] ?>" class="product-name">
+                        <?= htmlspecialchars($p['name']) ?>
+                    </a>
+                    <div class="product-price">
+                        <span class="price">$<?= number_format($p['price'], 2) ?></span>
+                        <?php if ($p['sale_price']): ?>
+                            <span class="old-price">$<?= number_format($p['price'], 2) ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <button class="add-to-cart" data-product-id="<?= $p['id'] ?>">
+                        🛒 Add to Cart
+                    </button>
                 </div>
-                <button class="add-to-cart" data-product-id="<?= $p['id'] ?>">
-                    🛒 Add to Cart
-                </button>
             </div>
-        </div>
-    <?php endforeach; ?>
-
-    <?php if (empty($featuredProducts)): ?>
-        <p style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">
-            No products yet. <a href="admin/dashboard.php">Add products in admin panel</a>
-        </p>
-    <?php endif; ?>
+        <?php endforeach; ?>
+    </div>
+    <div class="carousel-arrow carousel-arrow-right" id="featuredRightArrow">
+        <i class="fas fa-chevron-right"></i>
+    </div>
 </div>
 
 <!-- New Arrivals -->
@@ -350,6 +423,51 @@ $newArrivals = $product->getNewArrivals(4);
 </div>
 
 <script>
+    (function() {
+        // Carousel functionality
+        function initCarousel(carouselId, leftArrowId, rightArrowId) {
+            const carousel = document.getElementById(carouselId);
+            const leftArrow = document.getElementById(leftArrowId);
+            const rightArrow = document.getElementById(rightArrowId);
+            if (!carousel || !leftArrow || !rightArrow) return;
+
+            const scrollAmount = 300; // Adjust based on card width + gap
+
+            leftArrow.addEventListener('click', () => {
+                carousel.scrollBy({
+                    left: -scrollAmount,
+                    behavior: 'smooth'
+                });
+            });
+
+            rightArrow.addEventListener('click', () => {
+                carousel.scrollBy({
+                    left: scrollAmount,
+                    behavior: 'smooth'
+                });
+            });
+
+            // Optional: Hide arrows if not scrollable
+            const checkScrollable = () => {
+                const isScrollable = carousel.scrollWidth > carousel.clientWidth;
+                leftArrow.style.opacity = isScrollable ? '1' : '0.5';
+                rightArrow.style.opacity = isScrollable ? '1' : '0.5';
+                leftArrow.style.pointerEvents = isScrollable ? 'auto' : 'none';
+                rightArrow.style.pointerEvents = isScrollable ? 'auto' : 'none';
+            };
+
+            checkScrollable();
+            window.addEventListener('resize', checkScrollable);
+            // Check after images load
+            carousel.addEventListener('scroll', checkScrollable);
+        }
+
+        // Initialize both carousels
+        initCarousel('featuredCarousel', 'featuredLeftArrow', 'featuredRightArrow');
+        initCarousel('newArrivalsCarousel', 'newLeftArrow', 'newRightArrow');
+    })();
+
+
     (function() {
         // Prevent multiple initializations
         if (window.__cartListenerAdded) return;

@@ -1,11 +1,11 @@
 <?php
 require_once 'auth_check.php';
 require_once '../classes/Product.php';
-require_once '../includes/header.php';
 
 $productObj = new Product();
 $db = db();
 
+// Get categories for dropdown
 $categories = $db->query("SELECT id, name FROM categories ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 
 $isEdit = isset($_GET['id']);
@@ -17,15 +17,17 @@ if ($isEdit && !$product) {
 }
 
 $error = '';
+$message = '';
+
+// Handle form submission BEFORE any output
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Handle image uploads
     $uploadedImages = [];
     $uploadDir = __DIR__ . '/../assets/uploads/products/';
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0777, true);
     }
 
-    // Process new uploaded files
+    // Process uploaded files
     if (!empty($_FILES['images']['name'][0])) {
         foreach ($_FILES['images']['tmp_name'] as $key => $tmpName) {
             if ($_FILES['images']['error'][$key] === UPLOAD_ERR_OK) {
@@ -39,46 +41,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // If editing, keep existing images unless new ones were uploaded
+    // If editing and no new images, keep existing ones
     if ($isEdit && empty($uploadedImages)) {
         $existingImages = json_decode($product['images'] ?? '[]', true);
         $uploadedImages = $existingImages ?: [];
     }
 
-    $data = [
-        'category_id'      => $_POST['category_id'],
-        'name'             => $_POST['name'],
-        'slug'             => strtolower(str_replace(' ', '-', $_POST['name'])),
-        'description'      => $_POST['description'],
-        'short_description' => $_POST['short_description'],
-        'price'            => $_POST['price'],
-        'sale_price'       => $_POST['sale_price'] ?: null,
-        'stock_quantity'   => $_POST['stock_quantity'],
-        'sku'              => $_POST['sku'],
-        'status'           => $_POST['status'],
-        'featured'         => isset($_POST['featured']) ? 1 : 0,
-        'images'           => json_encode($uploadedImages)
-    ];
+    // --- Price Validation ---
+    $price = (float)$_POST['price'];
+    $salePrice = $_POST['sale_price'] !== '' ? (float)$_POST['sale_price'] : null;
 
-    if ($isEdit) {
-        $productObj->update($_GET['id'], $data);
-    } else {
-        $productObj->create($data);
+    if ($price > 99999999.99 || $price < 0) {
+        $error = "Price must be between 0 and 99,999,999.99.";
+    }
+    if ($salePrice !== null && ($salePrice > 99999999.99 || $salePrice < 0)) {
+        $error = "Sale price must be between 0 and 99,999,999.99.";
     }
 
-    header('Location: /E-Commers-Website/admin/products.php');
-    exit;
+    // Only proceed if no validation error
+    if (!$error) {
+        $data = [
+            'category_id'      => $_POST['category_id'],
+            'name'             => $_POST['name'],
+            'slug'             => strtolower(str_replace(' ', '-', $_POST['name'])),
+            'description'      => $_POST['description'],
+            'short_description' => $_POST['short_description'],
+            'price'            => $price,
+            'sale_price'       => $salePrice,
+            'stock_quantity'   => $_POST['stock_quantity'],
+            'sku'              => $_POST['sku'],
+            'status'           => $_POST['status'],
+            'featured'         => isset($_POST['featured']) ? 1 : 0,
+            'images'           => json_encode($uploadedImages)
+        ];
+
+        if ($isEdit) {
+            $result = $productObj->update($_GET['id'], $data);
+        } else {
+            $result = $productObj->create($data);
+        }
+
+        if (is_array($result) && isset($result['error'])) {
+            $error = $result['error'];
+        } else {
+            header('Location: /E-Commers-Website/admin/products.php');
+            exit;
+        }
+    }
 }
+
+// Now include header (output starts here)
+require_once '../includes/header.php';
 ?>
 
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar (same as before) -->
+        <!-- Sidebar -->
         <nav class="col-md-2 d-md-block bg-light sidebar" style="min-height: 100vh;">
             <div class="position-sticky pt-3">
                 <ul class="nav flex-column">
                     <li class="nav-item"><a class="nav-link" href="/E-Commers-Website/admin/dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link active" href="/E-Commers-Website/admin/products.php"><i class="fas fa-box"></i> Products</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/E-Commers-Website/admin/categories.php"><i class="fas fa-tags"></i> Categories</a></li>
                     <li class="nav-item"><a class="nav-link" href="/E-Commers-Website/admin/orders.php"><i class="fas fa-shopping-cart"></i> Orders</a></li>
                     <li class="nav-item"><a class="nav-link text-danger" href="/E-Commers-Website/logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                 </ul>
@@ -87,6 +111,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <main class="col-md-10 ms-sm-auto px-md-4 py-4">
             <h1 class="h2 mb-4"><?= $isEdit ? 'Edit' : 'Add New' ?> Product</h1>
+
+            <?php if (!empty($error)): ?>
+                <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+            <?php endif; ?>
 
             <form method="POST" enctype="multipart/form-data" class="bg-white p-4 rounded shadow-sm">
                 <div class="row g-3">

@@ -72,17 +72,22 @@ $orders = $db->query("
             <div class="position-sticky pt-3">
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link" href="/E-Commers-Website/admin/dashboard.php">
+                        <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : '' ?>" href="/E-Commers-Website/admin/dashboard.php">
                             <i class="fas fa-tachometer-alt"></i> Dashboard
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/E-Commers-Website/admin/products.php">
+                        <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'products.php' ? 'active' : '' ?>" href="/E-Commers-Website/admin/products.php">
                             <i class="fas fa-box"></i> Products
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/E-Commers-Website/admin/orders.php">
+                        <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'categories.php' ? 'active' : '' ?>" href="/E-Commers-Website/admin/categories.php">
+                            <i class="fas fa-tags"></i> Categories
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'orders.php' ? 'active' : '' ?>" href="/E-Commers-Website/admin/orders.php">
                             <i class="fas fa-shopping-cart"></i> Orders
                         </a>
                     </li>

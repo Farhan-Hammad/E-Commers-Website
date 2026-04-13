@@ -21,6 +21,34 @@ class Order
         try {
             $this->db->beginTransaction();
 
+            // ========== VALIDATE STOCK BEFORE PROCEEDING ==========
+            foreach ($cartItems as $item) {
+                $checkStmt = $this->db->prepare("
+                    SELECT stock_quantity 
+                    FROM products 
+                    WHERE id = ? AND status = 'active'
+                ");
+                $checkStmt->execute([$item['product_id']]);
+                $currentStock = $checkStmt->fetchColumn();
+
+                if ($currentStock === false) {
+                    // Product not found or inactive
+                    $this->db->rollBack();
+                    return [
+                        'success' => false,
+                        'message' => "Product '{$item['name']}' is no longer available."
+                    ];
+                }
+
+                if ($currentStock < $item['quantity']) {
+                    $this->db->rollBack();
+                    return [
+                        'success' => false,
+                        'message' => "Insufficient stock for '{$item['name']}'. Only {$currentStock} left."
+                    ];
+                }
+            }
+
             // Generate unique order number
             $orderNumber = 'ORD-' . strtoupper(uniqid());
 
@@ -66,12 +94,13 @@ class Order
                     $item['subtotal']
                 ]);
 
-                // Optionally reduce stock
+                // Reduce stock (we already validated stock, so this is safe)
                 $updateStock = $this->db->prepare("
-                    UPDATE products SET stock_quantity = stock_quantity - ? 
-                    WHERE id = ? AND stock_quantity >= ?
+                    UPDATE products 
+                    SET stock_quantity = stock_quantity - ? 
+                    WHERE id = ?
                 ");
-                $updateStock->execute([$item['quantity'], $item['product_id'], $item['quantity']]);
+                $updateStock->execute([$item['quantity'], $item['product_id']]);
             }
 
             $this->db->commit();

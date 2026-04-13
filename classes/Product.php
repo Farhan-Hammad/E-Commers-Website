@@ -74,20 +74,17 @@ class Product
     // Get all products with filters
     public function getAll($filters = [], $page = 1, $perPage = 12)
     {
-        // Handle count-only mode when second param is true (for new products.php)
         $countOnly = ($page === true);
 
         $where = ["p.status = 'active'"];
         $params = [];
 
-        // Category filter (supports both 'category' slug and 'category_slug')
         $categorySlug = $filters['category_slug'] ?? $filters['category'] ?? null;
         if (!empty($categorySlug)) {
             $where[] = "c.slug = ?";
             $params[] = $categorySlug;
         }
 
-        // Search
         if (!empty($filters['search'])) {
             $where[] = "(p.name LIKE ? OR p.description LIKE ? OR p.short_description LIKE ?)";
             $searchTerm = '%' . $filters['search'] . '%';
@@ -96,7 +93,6 @@ class Product
             $params[] = $searchTerm;
         }
 
-        // Price range (handles sale price logic)
         if (isset($filters['min_price']) && is_numeric($filters['min_price'])) {
             $where[] = "(CASE WHEN p.sale_price IS NOT NULL AND p.sale_price < p.price THEN p.sale_price ELSE p.price END) >= ?";
             $params[] = (float)$filters['min_price'];
@@ -108,7 +104,6 @@ class Product
 
         $whereClause = implode(' AND ', $where);
 
-        // --- COUNT QUERY (if countOnly or we need total for pagination) ---
         $countSql = "SELECT COUNT(*) FROM {$this->table} p LEFT JOIN categories c ON p.category_id = c.id WHERE $whereClause";
         $countStmt = $this->db->prepare($countSql);
         $countStmt->execute($params);
@@ -118,7 +113,6 @@ class Product
             return $total;
         }
 
-        // --- SORTING ---
         $sort = $filters['sort'] ?? 'newest';
         $orderBy = match ($sort) {
             'price_asc'  => "(CASE WHEN p.sale_price IS NOT NULL AND p.sale_price < p.price THEN p.sale_price ELSE p.price END) ASC",
@@ -128,8 +122,6 @@ class Product
             default      => "p.created_at DESC"
         };
 
-        // --- PAGINATION ---
-        // Support both new style (limit/offset) and old style (page/perPage)
         if (isset($filters['limit'])) {
             $limit = (int)$filters['limit'];
             $offset = (int)($filters['offset'] ?? 0);
@@ -140,7 +132,6 @@ class Product
             $offset = ($page - 1) * $perPage;
         }
 
-        // --- MAIN QUERY ---
         $sql = "SELECT p.*, c.name as category_name, c.slug as category_slug 
             FROM {$this->table} p 
             LEFT JOIN categories c ON p.category_id = c.id 
@@ -152,7 +143,6 @@ class Product
         $stmt->execute(array_merge($params, [$limit, $offset]));
         $products = $stmt->fetchAll();
 
-        // For backward compatibility with old calling style that expects array with pagination info
         if (!isset($filters['limit']) && func_num_args() >= 2) {
             return [
                 'products'      => $products,
@@ -168,28 +158,38 @@ class Product
     // Create product (admin)
     public function create($data)
     {
-        $stmt = $this->db->prepare("
-        INSERT INTO {$this->table} 
-        (category_id, name, slug, description, short_description, price, sale_price, stock_quantity, sku, status, featured, images) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ");
+        try {
+            $stmt = $this->db->prepare("
+                INSERT INTO {$this->table} 
+                (category_id, name, slug, description, short_description, price, sale_price, stock_quantity, sku, status, featured, images) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
 
-        $stmt->execute([
-            $data['category_id'],
-            $data['name'],
-            $data['slug'],
-            $data['description'],
-            $data['short_description'] ?? null,
-            $data['price'],
-            $data['sale_price'] ?? null,
-            $data['stock_quantity'] ?? 0,
-            $data['sku'],
-            $data['status'] ?? 'active',
-            $data['featured'] ?? false,
-            $data['images'] ?? null
-        ]);
+            $stmt->execute([
+                $data['category_id'],
+                $data['name'],
+                $data['slug'],
+                $data['description'],
+                $data['short_description'] ?? null,
+                $data['price'],
+                $data['sale_price'] ?? null,
+                $data['stock_quantity'] ?? 0,
+                $data['sku'],
+                $data['status'] ?? 'active',
+                $data['featured'] ?? false,
+                $data['images'] ?? null
+            ]);
 
-        return $this->db->lastInsertId();
+            return $this->db->lastInsertId();
+        } catch (PDOException $e) {
+            if ($e->getCode() == 22003) {
+                return ['error' => 'Price value is too large. Maximum is 99,999,999.99.'];
+            }
+            if ($e->getCode() == 23000) {
+                return ['error' => 'SKU already exists. Please use a different SKU.'];
+            }
+            throw $e;
+        }
     }
 
     // Update product (admin)
@@ -209,7 +209,8 @@ class Product
             'stock_quantity',
             'sku',
             'status',
-            'featured'
+            'featured',
+            'images'
         ];
 
         foreach ($allowed as $field) {
@@ -224,8 +225,18 @@ class Product
         $values[] = $id;
         $sql = "UPDATE {$this->table} SET " . implode(', ', $fields) . " WHERE id = ?";
 
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute($values);
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute($values);
+        } catch (PDOException $e) {
+            if ($e->getCode() == 22003) {
+                return ['error' => 'Price value is too large. Maximum is 99,999,999.99.'];
+            }
+            if ($e->getCode() == 23000) {
+                return ['error' => 'SKU already exists. Please use a different SKU.'];
+            }
+            throw $e;
+        }
     }
 
     // Delete product (admin)
