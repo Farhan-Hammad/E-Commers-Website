@@ -22,14 +22,12 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyStore - Your Online Shopping Destination</title>
+    <title><?= $pageTitle ?? 'MyStore' ?> - MyStore</title>
 
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-
-    <link rel="icon" type="image/png" href="/E-Commers-Website/favicon.png">
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -37,39 +35,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/E-Commers-Website/assets/css/style.css">
-
-    <style>
-        /* Cart badge styling */
-        .cart-badge {
-            position: relative;
-        }
-
-        .cart-count {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background-color: #dc3545;
-            color: white;
-            border-radius: 50%;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.7rem;
-            min-width: 18px;
-            text-align: center;
-        }
-
-        /* User dropdown avatar */
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            background-color: #0d6efd;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-    </style>
 </head>
 
 <body>
@@ -90,20 +55,18 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
             <div class="collapse navbar-collapse" id="navbarMain">
                 <!-- Main Navigation Links -->
-                <!-- Main Navigation Links -->
                 <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
+                    <li class="nav-item mx-1">
                         <a class="nav-link <?= $currentPage == 'index.php' ? 'active' : '' ?>" href="/E-Commers-Website/index.php">
                             <i class="fas fa-home"></i> Home
                         </a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item mx-1">
                         <a class="nav-link <?= $currentPage == 'products.php' ? 'active' : '' ?>" href="/E-Commers-Website/pages/products.php">
                             <i class="fas fa-tag"></i> Products
                         </a>
                     </li>
-                    <!-- ... -->
-                    <li class="nav-item">
+                    <li class="nav-item mx-1">
                         <a class="nav-link" href="/E-Commers-Website/pages/cart.php">
                             <i class="fas fa-shopping-cart"></i> Cart
                         </a>
@@ -122,7 +85,14 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 </form>
 
                 <!-- Right Side Icons -->
-                <ul class="navbar-nav mb-2 mb-lg-0">
+                <ul class="navbar-nav mb-2 mb-lg-0 align-items-center">
+                    <!-- Theme Toggle Button -->
+                    <li class="nav-item me-2">
+                        <button class="btn theme-toggle" id="themeToggle" title="Toggle dark/light mode">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </li>
+
                     <!-- Cart Icon with Badge -->
                     <li class="nav-item me-2">
                         <a class="nav-link position-relative" href="/E-Commers-Website/pages/cart.php">
@@ -145,36 +115,24 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                                 <span><?= htmlspecialchars($currentUser['first_name'] ?? 'User') ?></span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="/E-Commers-Website/profile.php">
-                                        <i class="fas fa-user"></i> My Profile
-                                    </a></li>
-                                <li><a class="dropdown-item" href="/E-Commers-Website/orders.php">
-                                        <i class="fas fa-box"></i> My Orders
-                                    </a></li>
-                                <li><a class="dropdown-item" href="/E-Commers-Website/wishlist.php">
-                                        <i class="fas fa-heart"></i> Wishlist
-                                    </a></li>
+                                <li><a class="dropdown-item" href="/E-Commers-Website/profile.php"><i class="fas fa-user"></i> My Profile</a></li>
+                                <li><a class="dropdown-item" href="/E-Commers-Website/orders.php"><i class="fas fa-box"></i> My Orders</a></li>
+                                <li><a class="dropdown-item" href="/E-Commers-Website/wishlist.php"><i class="fas fa-heart"></i> Wishlist</a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <?php if ($user->isAdmin()): ?>
-                                    <li><a class="dropdown-item" href="/E-Commers-Website/admin/dashboard.php">
-                                            <i class="fas fa-cog"></i> Admin Dashboard
-                                        </a></li>
+                                    <li><a class="dropdown-item" href="/E-Commers-Website/admin/dashboard.php"><i class="fas fa-cog"></i> Admin Dashboard</a></li>
                                     <li>
                                         <hr class="dropdown-divider">
                                     </li>
                                 <?php endif; ?>
-                                <li><a class="dropdown-item text-danger" href="/E-Commers-Website/logout.php">
-                                        <i class="fas fa-sign-out-alt"></i> Logout
-                                    </a></li>
+                                <li><a class="dropdown-item text-danger" href="/E-Commers-Website/logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                             </ul>
                         </li>
                     <?php else: ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="/E-Commers-Website/login.php">
-                                <i class="fas fa-sign-in-alt"></i> Login
-                            </a>
+                            <a class="nav-link" href="/E-Commers-Website/login.php"><i class="fas fa-sign-in-alt"></i> Login</a>
                         </li>
                         <li class="nav-item">
                             <a class="btn btn-primary btn-sm ms-2" href="/E-Commers-Website/register.php">Register</a>
@@ -185,5 +143,5 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         </div>
     </nav>
 
-    <!-- Main Content Container (closing tag in footer.php) -->
+    <!-- Main Content Container -->
     <main>

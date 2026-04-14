@@ -8,7 +8,6 @@ $featuredProducts = $product->getFeatured(8);
 $newArrivals = $product->getNewArrivals(4);
 ?>
 
-
 <!-- Hero Section -->
 <section class="hero">
     <h1>Elevate Your Everyday</h1>
@@ -65,8 +64,7 @@ $newArrivals = $product->getNewArrivals(4);
     </a>
 </div>
 
-<!-- Featured Products -->
-<!-- Featured Products -->
+<!-- Featured Products Carousel -->
 <div class="section-header">
     <h2>⭐ Featured Products</h2>
     <a href="pages/products.php?featured=1" class="view-all">View All →</a>
@@ -78,14 +76,12 @@ $newArrivals = $product->getNewArrivals(4);
     </div>
     <div class="product-carousel" id="featuredCarousel">
         <?php foreach ($featuredProducts as $p): ?>
-            <div class="product-card" style="min-width: 250px; flex: 0 0 auto;">
+            <div class="product-card">
                 <?php
                 $images = json_decode($p['images'] ?? '[]', true);
                 $firstImage = !empty($images) ? $images[0] : '/E-Commers-Website/assets/images/placeholder.jpg';
                 ?>
-                <img src="<?= htmlspecialchars($firstImage) ?>"
-                    alt="<?= htmlspecialchars($p['name']) ?>"
-                    style="width: 100%; height: 200px; object-fit: cover;">
+                <img src="<?= htmlspecialchars($firstImage) ?>" alt="<?= htmlspecialchars($p['name']) ?>">
                 <div class="product-info">
                     <span class="product-category"><?= htmlspecialchars($p['category_name'] ?? 'General') ?></span>
                     <a href="pages/product-detail.php?slug=<?= $p['slug'] ?>" class="product-name">
@@ -109,29 +105,27 @@ $newArrivals = $product->getNewArrivals(4);
     </div>
 </div>
 
-<!-- New Arrivals -->
+<!-- New Arrivals Grid -->
 <div class="section-header">
     <h2>🆕 New Arrivals</h2>
     <a href="pages/products.php?sort=newest" class="view-all">View All →</a>
 </div>
 
-<div class="product-grid">
+<div class="product-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
     <?php foreach ($newArrivals as $p): ?>
         <div class="product-card">
             <?php
             $images = json_decode($p['images'] ?? '[]', true);
             $firstImage = !empty($images) ? $images[0] : '/E-Commers-Website/assets/images/placeholder.jpg';
             ?>
-            <img src="<?= htmlspecialchars($firstImage) ?>"
-                alt="<?= htmlspecialchars($p['name']) ?>"
-                style="width: 100%; height: 200px; object-fit: cover;">
+            <img src="<?= htmlspecialchars($firstImage) ?>" alt="<?= htmlspecialchars($p['name']) ?>">
             <div class="product-info">
-                <span class="product-category"><?php echo htmlspecialchars($p['category_name'] ?? 'General'); ?></span>
-                <a href="pages/product-detail.php?slug=<?php echo $p['slug']; ?>" class="product-name">
-                    <?php echo htmlspecialchars($p['name']); ?>
+                <span class="product-category"><?= htmlspecialchars($p['category_name'] ?? 'General') ?></span>
+                <a href="pages/product-detail.php?slug=<?= $p['slug'] ?>" class="product-name">
+                    <?= htmlspecialchars($p['name']) ?>
                 </a>
                 <div class="product-price">
-                    <span class="price">$<?php echo number_format($p['price'], 2); ?></span>
+                    <span class="price">$<?= number_format($p['price'], 2) ?></span>
                 </div>
                 <button class="add-to-cart" data-product-id="<?= $p['id'] ?>">
                     🛒 Add to Cart
@@ -150,7 +144,7 @@ $newArrivals = $product->getNewArrivals(4);
             const rightArrow = document.getElementById(rightArrowId);
             if (!carousel || !leftArrow || !rightArrow) return;
 
-            const scrollAmount = 300; // Adjust based on card width + gap
+            const scrollAmount = 300;
 
             leftArrow.addEventListener('click', () => {
                 carousel.scrollBy({
@@ -158,7 +152,6 @@ $newArrivals = $product->getNewArrivals(4);
                     behavior: 'smooth'
                 });
             });
-
             rightArrow.addEventListener('click', () => {
                 carousel.scrollBy({
                     left: scrollAmount,
@@ -166,7 +159,6 @@ $newArrivals = $product->getNewArrivals(4);
                 });
             });
 
-            // Optional: Hide arrows if not scrollable
             const checkScrollable = () => {
                 const isScrollable = carousel.scrollWidth > carousel.clientWidth;
                 leftArrow.style.opacity = isScrollable ? '1' : '0.5';
@@ -174,25 +166,17 @@ $newArrivals = $product->getNewArrivals(4);
                 leftArrow.style.pointerEvents = isScrollable ? 'auto' : 'none';
                 rightArrow.style.pointerEvents = isScrollable ? 'auto' : 'none';
             };
-
             checkScrollable();
             window.addEventListener('resize', checkScrollable);
-            // Check after images load
             carousel.addEventListener('scroll', checkScrollable);
         }
-
-        // Initialize both carousels
         initCarousel('featuredCarousel', 'featuredLeftArrow', 'featuredRightArrow');
-        initCarousel('newArrivalsCarousel', 'newLeftArrow', 'newRightArrow');
     })();
 
-
     (function() {
-        // Prevent multiple initializations
         if (window.__cartListenerAdded) return;
         window.__cartListenerAdded = true;
 
-        // Toast helper
         function showToast(message, type = 'success') {
             let container = document.getElementById('toast-container');
             if (!container) {
@@ -209,7 +193,6 @@ $newArrivals = $product->getNewArrivals(4);
             setTimeout(() => toast.remove(), 3000);
         }
 
-        // Update cart badge
         function updateCartCount(count) {
             const cartBadge = document.querySelector('.cart-count');
             if (cartBadge) {
@@ -218,22 +201,14 @@ $newArrivals = $product->getNewArrivals(4);
             }
         }
 
-        // Global click listener using event delegation
         document.addEventListener('click', async function(e) {
             const addBtn = e.target.closest('.add-to-cart');
             if (!addBtn) return;
-
             e.preventDefault();
-
-            // Don't proceed if already disabled (prevents double clicks)
             if (addBtn.disabled) return;
 
             const productId = addBtn.dataset.productId;
             if (!productId) return;
-
-            // Get quantity if exists (for product detail page)
-            const quantityInput = document.getElementById('quantity');
-            const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
 
             const originalHtml = addBtn.innerHTML;
             addBtn.disabled = true;
@@ -247,7 +222,7 @@ $newArrivals = $product->getNewArrivals(4);
                     },
                     body: JSON.stringify({
                         product_id: productId,
-                        quantity: quantity
+                        quantity: 1
                     })
                 });
                 const result = await response.json();
@@ -255,10 +230,8 @@ $newArrivals = $product->getNewArrivals(4);
                 if (response.status === 401) {
                     showToast('Please log in to add items to cart', 'danger');
                     setTimeout(() => window.location.href = '/E-Commers-Website/login.php', 1500);
-                    // Keep button disabled during redirect
                     return;
                 }
-
                 if (result.success) {
                     showToast(result.message || 'Item added to cart!', 'success');
                     updateCartCount(result.cart_count);
@@ -266,10 +239,8 @@ $newArrivals = $product->getNewArrivals(4);
                     showToast(result.message || 'Could not add item', 'danger');
                 }
             } catch (error) {
-                console.error('Cart error:', error);
                 showToast('Something went wrong. Please try again.', 'danger');
             } finally {
-                // Reset button state (if not redirecting)
                 if (addBtn.disabled) {
                     addBtn.disabled = false;
                     addBtn.innerHTML = originalHtml;
