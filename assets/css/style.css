@@ -703,3 +703,17 @@ footer a:hover {
         right: 0;
     }
 }
+
+
+
+
+
+
+
+
+
+@media (max-width: 768px) {
+    .product-detail .col-md-6:first-child {
+        margin-bottom: 2rem;
+    }
+}

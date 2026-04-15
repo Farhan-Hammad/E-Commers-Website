@@ -106,33 +106,45 @@ $newArrivals = $product->getNewArrivals(4);
 </div>
 
 <!-- New Arrivals Grid -->
+<!-- New Arrivals Carousel -->
 <div class="section-header">
     <h2>🆕 New Arrivals</h2>
     <a href="pages/products.php?sort=newest" class="view-all">View All →</a>
 </div>
 
-<div class="product-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
-    <?php foreach ($newArrivals as $p): ?>
-        <div class="product-card">
-            <?php
-            $images = json_decode($p['images'] ?? '[]', true);
-            $firstImage = !empty($images) ? $images[0] : '/E-Commers-Website/assets/images/placeholder.jpg';
-            ?>
-            <img src="<?= htmlspecialchars($firstImage) ?>" alt="<?= htmlspecialchars($p['name']) ?>">
-            <div class="product-info">
-                <span class="product-category"><?= htmlspecialchars($p['category_name'] ?? 'General') ?></span>
-                <a href="pages/product-detail.php?slug=<?= $p['slug'] ?>" class="product-name">
-                    <?= htmlspecialchars($p['name']) ?>
-                </a>
-                <div class="product-price">
-                    <span class="price">$<?= number_format($p['price'], 2) ?></span>
+<div class="product-carousel-container">
+    <div class="carousel-arrow carousel-arrow-left" id="newLeftArrow">
+        <i class="fas fa-chevron-left"></i>
+    </div>
+    <div class="product-carousel" id="newArrivalsCarousel">
+        <?php foreach ($newArrivals as $p): ?>
+            <div class="product-card">
+                <?php
+                $images = json_decode($p['images'] ?? '[]', true);
+                $firstImage = !empty($images) ? $images[0] : '/E-Commers-Website/assets/images/placeholder.jpg';
+                ?>
+                <img src="<?= htmlspecialchars($firstImage) ?>" alt="<?= htmlspecialchars($p['name']) ?>">
+                <div class="product-info">
+                    <span class="product-category"><?= htmlspecialchars($p['category_name'] ?? 'General') ?></span>
+                    <a href="pages/product-detail.php?slug=<?= $p['slug'] ?>" class="product-name">
+                        <?= htmlspecialchars($p['name']) ?>
+                    </a>
+                    <div class="product-price">
+                        <span class="price">$<?= number_format($p['price'], 2) ?></span>
+                        <?php if ($p['sale_price']): ?>
+                            <span class="old-price">$<?= number_format($p['sale_price'], 2) ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <button class="add-to-cart" data-product-id="<?= $p['id'] ?>">
+                        🛒 Add to Cart
+                    </button>
                 </div>
-                <button class="add-to-cart" data-product-id="<?= $p['id'] ?>">
-                    🛒 Add to Cart
-                </button>
             </div>
-        </div>
-    <?php endforeach; ?>
+        <?php endforeach; ?>
+    </div>
+    <div class="carousel-arrow carousel-arrow-right" id="newRightArrow">
+        <i class="fas fa-chevron-right"></i>
+    </div>
 </div>
 
 <script>
@@ -171,6 +183,7 @@ $newArrivals = $product->getNewArrivals(4);
             carousel.addEventListener('scroll', checkScrollable);
         }
         initCarousel('featuredCarousel', 'featuredLeftArrow', 'featuredRightArrow');
+        initCarousel('newArrivalsCarousel', 'newLeftArrow', 'newRightArrow');
     })();
 
     (function() {
