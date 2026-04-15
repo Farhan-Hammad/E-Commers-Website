@@ -13,7 +13,6 @@ $userData = $user->getById($currentUser['id']);
 $message = '';
 $messageType = '';
 
-// Handle profile update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     $updateData = [
         'first_name' => $_POST['first_name'],
@@ -27,18 +26,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     $result = $user->updateProfile($currentUser['id'], $updateData);
     $message = $result['message'];
     $messageType = $result['success'] ? 'success' : 'danger';
-    if ($result['success']) {
-        $userData = $user->getById($currentUser['id']);
-    }
+    if ($result['success']) $userData = $user->getById($currentUser['id']);
 }
 
-// Handle password change
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
-    $result = $user->changePassword(
-        $currentUser['id'],
-        $_POST['current_password'],
-        $_POST['new_password']
-    );
+    $result = $user->changePassword($currentUser['id'], $_POST['current_password'], $_POST['new_password']);
     $message = $result['message'];
     $messageType = $result['success'] ? 'success' : 'danger';
 }
@@ -46,14 +38,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
 
 <div class="container py-5">
     <h1 class="mb-4">My Profile</h1>
-
     <?php if ($message): ?>
         <div class="alert alert-<?= $messageType ?>"><?= htmlspecialchars($message) ?></div>
     <?php endif; ?>
-
     <div class="row">
         <div class="col-md-6">
-            <div class="card shadow-sm mb-4">
+            <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white">
                     <h5 class="mb-0">Profile Information</h5>
                 </div>
@@ -100,9 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
                 </div>
             </div>
         </div>
-
         <div class="col-md-6">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm border-0">
                 <div class="card-header bg-white">
                     <h5 class="mb-0">Change Password</h5>
                 </div>

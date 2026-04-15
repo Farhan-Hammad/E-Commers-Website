@@ -5,24 +5,20 @@ if (!$user->isLoggedIn()) {
     header('Location: /E-Commers-Website/login.php');
     exit;
 }
+
 require_once '../includes/header.php';
 require_once '../classes/Cart.php';
-require_once '../classes/User.php';
 
 $cart = new Cart();
 $cartItems = $cart->getItems();
 $subtotal = $cart->subtotal();
 
-// Redirect if cart is empty
 if (empty($cartItems)) {
-    header('Location: /E-Commers-Website/pages/cart.php');
+    header('Location: cart.php');
     exit;
 }
 
-$user = new User();
 $currentUser = $user->getCurrentUser();
-
-// Pre-fill form if user is logged in
 $shipping = [
     'name' => $currentUser['name'] ?? '',
     'email' => $currentUser['email'] ?? '',
@@ -37,11 +33,9 @@ $shipping = [
 
 <div class="container py-5">
     <h1 class="mb-4">Checkout</h1>
-
     <div class="row">
-        <!-- Shipping Form -->
         <div class="col-lg-8">
-            <div class="card shadow-sm mb-4">
+            <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white">
                     <h5 class="mb-0">Shipping Information</h5>
                 </div>
@@ -98,10 +92,8 @@ $shipping = [
                 </div>
             </div>
         </div>
-
-        <!-- Order Summary -->
         <div class="col-lg-4">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm border-0">
                 <div class="card-header bg-white">
                     <h5 class="mb-0">Order Summary</h5>
                 </div>
@@ -126,8 +118,6 @@ $shipping = [
                         <span>Total</span>
                         <span>$<?= number_format($subtotal, 2) ?></span>
                     </div>
-
-                    <!-- Payment Method (Demo) -->
                     <div class="mb-3">
                         <label class="form-label fw-bold">Payment Method</label>
                         <div class="form-check">
@@ -136,14 +126,12 @@ $shipping = [
                                 <i class="fas fa-money-bill-wave text-success"></i> Cash on Delivery (Demo)
                             </label>
                         </div>
-                        <small class="text-muted">This is a demo project – no actual payment will be processed.</small>
+                        <small class="text-muted">This is a demo project – no actual payment.</small>
                     </div>
-
                     <button type="submit" form="checkoutForm" class="btn btn-primary w-100 btn-lg">
                         <i class="fas fa-lock"></i> Place Order (Demo)
                     </button>
-
-                    <a href="/E-Commers-Website/pages/cart.php" class="btn btn-outline-secondary w-100 mt-2">
+                    <a href="cart.php" class="btn btn-outline-secondary w-100 mt-2">
                         <i class="fas fa-arrow-left"></i> Back to Cart
                     </a>
                 </div>
@@ -155,17 +143,12 @@ $shipping = [
 <script>
     document.getElementById('checkoutForm').addEventListener('submit', function(e) {
         e.preventDefault();
-
-        const form = this;
         const btn = document.querySelector('button[type="submit"]');
         const originalText = btn.innerHTML;
-
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing...';
-
-        const formData = new FormData(form);
-
-        fetch(form.action, {
+        const formData = new FormData(this);
+        fetch(this.action, {
                 method: 'POST',
                 body: formData
             })
@@ -180,7 +163,7 @@ $shipping = [
                 }
             })
             .catch(error => {
-                alert('An error occurred. Please try again.');
+                alert('An error occurred.');
                 btn.disabled = false;
                 btn.innerHTML = originalText;
             });

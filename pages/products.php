@@ -6,7 +6,7 @@ $product = new Product();
 
 // --- Fetch categories for sidebar ---
 $db = Database::getInstance()->getConnection();
-$catStmt = $db->query("SELECT id, name, slug FROM categories WHERE status = 1 ORDER BY name");
+$catStmt = $db->query("SELECT id, name, slug FROM categories WHERE status = 'active' ORDER BY name");
 $categories = $catStmt->fetchAll(PDO::FETCH_ASSOC);
 
 // --- Build filter array from GET parameters ---
@@ -14,14 +14,11 @@ $filters = [];
 $pageTitle = 'All Products';
 $activeFilters = [];
 
-// Search
 if (!empty($_GET['search'])) {
     $filters['search'] = trim($_GET['search']);
     $pageTitle = 'Search: ' . htmlspecialchars($filters['search']);
     $activeFilters['search'] = $filters['search'];
 }
-
-// Category filter (slug)
 if (!empty($_GET['category'])) {
     $filters['category_slug'] = $_GET['category'];
     $catStmt = $db->prepare("SELECT name FROM categories WHERE slug = ?");
@@ -32,8 +29,6 @@ if (!empty($_GET['category'])) {
         $activeFilters['category'] = $_GET['category'];
     }
 }
-
-// Price range
 if (isset($_GET['min_price']) && is_numeric($_GET['min_price'])) {
     $filters['min_price'] = (float)$_GET['min_price'];
     $activeFilters['min_price'] = $filters['min_price'];
@@ -43,36 +38,31 @@ if (isset($_GET['max_price']) && is_numeric($_GET['max_price'])) {
     $activeFilters['max_price'] = $filters['max_price'];
 }
 
-// Sorting
 $allowedSort = ['price_asc', 'price_desc', 'name_asc', 'name_desc', 'newest'];
 $sort = $_GET['sort'] ?? 'newest';
-if (!in_array($sort, $allowedSort)) {
-    $sort = 'newest';
-}
+if (!in_array($sort, $allowedSort)) $sort = 'newest';
 $filters['sort'] = $sort;
 
-// Pagination
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $perPage = 12;
 $filters['limit'] = $perPage;
 $filters['offset'] = ($page - 1) * $perPage;
 
-// --- Get total count (for pagination) and products ---
 $countFilters = $filters;
 unset($countFilters['limit'], $countFilters['offset']);
-$totalProducts = $product->getAll($countFilters, true); // second param true = count only
+$totalProducts = $product->getAll($countFilters, true);
 $totalPages = ceil($totalProducts / $perPage);
 
-$products = $product->getAll($filters); // returns plain array of products
+$products = $product->getAll($filters);
 ?>
 
-<!-- Page Header -->
-<div class="bg-light py-4 mb-4">
+<!-- Page Header (theme‑aware) -->
+<div class="page-header py-4 mb-4">
     <div class="container">
         <h1 class="h2 mb-0"><?= $pageTitle ?></h1>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="../index.php">Home</a></li>
+                <li class="breadcrumb-item"><a href="/E-Commers-Website/index.php">Home</a></li>
                 <?php if (!empty($activeFilters['category'])): ?>
                     <li class="breadcrumb-item"><a href="products.php">Products</a></li>
                     <li class="breadcrumb-item active"><?= $pageTitle ?></li>
@@ -88,16 +78,14 @@ $products = $product->getAll($filters); // returns plain array of products
     <div class="row">
         <!-- Filters Sidebar -->
         <div class="col-lg-3 mb-4">
-            <form method="GET" id="filterForm" class="bg-white p-3 rounded shadow-sm">
-                <!-- Preserve search query if present -->
-                <?php if (!empty($filters['search'])): ?>
-                    <input type="hidden" name="search" value="<?= htmlspecialchars($filters['search']) ?>">
-                <?php endif; ?>
+            <form method="GET" id="filterForm" class="filter-card card shadow-sm border-0">
+                <div class="card-body">
+                    <?php if (!empty($filters['search'])): ?>
+                        <input type="hidden" name="search" value="<?= htmlspecialchars($filters['search']) ?>">
+                    <?php endif; ?>
 
-                <!-- Categories -->
-                <div class="mb-4">
-                    <h5 class="border-bottom pb-2">Categories</h5>
-                    <div class="list-group list-group-flush">
+                    <h5 class="border-bottom pb-2 mb-3">Categories</h5>
+                    <div class="list-group list-group-flush mb-4">
                         <a href="?<?= http_build_query(array_diff_key($_GET, ['category' => '', 'page' => ''])) ?>"
                             class="list-group-item list-group-item-action <?= empty($activeFilters['category']) ? 'active' : '' ?>">
                             All Categories
@@ -109,12 +97,9 @@ $products = $product->getAll($filters); // returns plain array of products
                             </a>
                         <?php endforeach; ?>
                     </div>
-                </div>
 
-                <!-- Price Range -->
-                <div class="mb-4">
-                    <h5 class="border-bottom pb-2">Price Range</h5>
-                    <div class="row g-2">
+                    <h5 class="border-bottom pb-2 mb-3">Price Range</h5>
+                    <div class="row g-2 mb-3">
                         <div class="col-6">
                             <input type="number" name="min_price" class="form-control form-control-sm"
                                 placeholder="Min $" value="<?= htmlspecialchars($_GET['min_price'] ?? '') ?>">
@@ -124,19 +109,17 @@ $products = $product->getAll($filters); // returns plain array of products
                                 placeholder="Max $" value="<?= htmlspecialchars($_GET['max_price'] ?? '') ?>">
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-sm btn-primary w-100 mt-2">Apply</button>
-                </div>
+                    <button type="submit" class="btn btn-primary btn-sm w-100">Apply</button>
 
-                <!-- Clear Filters -->
-                <?php if (!empty($activeFilters)): ?>
-                    <a href="products.php" class="btn btn-outline-secondary btn-sm w-100">Clear All Filters</a>
-                <?php endif; ?>
+                    <?php if (!empty($activeFilters)): ?>
+                        <a href="products.php" class="btn btn-outline-secondary btn-sm w-100 mt-2">Clear All Filters</a>
+                    <?php endif; ?>
+                </div>
             </form>
         </div>
 
         <!-- Products Grid -->
         <div class="col-lg-9">
-            <!-- Sort & Results Count -->
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <p class="mb-0 text-muted">Showing <?= count($products) ?> of <?= $totalProducts ?> products</p>
                 <select class="form-select w-auto" name="sort" form="filterForm" onchange="document.getElementById('filterForm').submit()">
@@ -148,54 +131,40 @@ $products = $product->getAll($filters); // returns plain array of products
                 </select>
             </div>
 
-            <!-- Products Grid -->
             <?php if (empty($products)): ?>
-                <div class="alert alert-info">No products found matching your criteria.</div>
+                <div class="alert alert-info">No products found.</div>
             <?php else: ?>
-                <div class="row g-4">
+                <div class="products-grid-container">
                     <?php foreach ($products as $prod): ?>
-                        <div class="col-md-4 col-6">
-                            <div class="card h-100 product-card shadow-sm">
-                                <?php
-                                $images = json_decode($prod['images'] ?? '[]', true);
-                                $firstImage = !empty($images) ? $images[0] : '/E-Commers-Website/assets/images/placeholder.jpg';
-                                ?>
-                                <a href="product-detail.php?slug=<?= urlencode($prod['slug']) ?>">
-                                    <img src="<?= htmlspecialchars($firstImage) ?>"
-                                        class="card-img-top" alt="<?= htmlspecialchars($prod['name']) ?>"
-                                        style="height: 200px; object-fit: cover;">
+                        <div class="product-card">
+                            <?php
+                            $images = json_decode($prod['images'] ?? '[]', true);
+                            $firstImage = !empty($images) ? $images[0] : '/E-Commers-Website/assets/images/placeholder.jpg';
+                            ?>
+                            <a href="product-detail.php?slug=<?= urlencode($prod['slug']) ?>">
+                                <img src="<?= htmlspecialchars($firstImage) ?>" alt="<?= htmlspecialchars($prod['name']) ?>">
+                            </a>
+                            <div class="product-info">
+                                <span class="product-category"><?= htmlspecialchars($prod['category_name'] ?? 'General') ?></span>
+                                <a href="product-detail.php?slug=<?= urlencode($prod['slug']) ?>" class="product-name">
+                                    <?= htmlspecialchars($prod['name']) ?>
                                 </a>
-                                <div class="card-body">
-                                    <h5 class="card-title">
-                                        <a href="product-detail.php?slug=<?= urlencode($prod['slug']) ?>"
-                                            class="text-decoration-none text-dark">
-                                            <?= htmlspecialchars($prod['name']) ?>
-                                        </a>
-                                    </h5>
-                                    <p class="card-text small text-muted">
-                                        <?= htmlspecialchars(substr($prod['short_description'] ?? '', 0, 60)) ?>...
-                                    </p>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <?php if (!empty($prod['sale_price']) && $prod['sale_price'] < $prod['price']): ?>
-                                                <span class="text-danger fw-bold">$<?= number_format($prod['sale_price'], 2) ?></span>
-                                                <small class="text-muted text-decoration-line-through ms-1">$<?= number_format($prod['price'], 2) ?></small>
-                                            <?php else: ?>
-                                                <span class="fw-bold">$<?= number_format($prod['price'], 2) ?></span>
-                                            <?php endif; ?>
-                                        </div>
-                                        <button class="btn btn-sm btn-outline-primary add-to-cart"
-                                            data-product-id="<?= $prod['id'] ?>">
-                                            <i class="fas fa-cart-plus"></i> Add
-                                        </button>
-                                    </div>
+                                <div class="product-price">
+                                    <?php if (!empty($prod['sale_price']) && $prod['sale_price'] < $prod['price']): ?>
+                                        <span class="price text-danger">$<?= number_format($prod['sale_price'], 2) ?></span>
+                                        <span class="old-price">$<?= number_format($prod['price'], 2) ?></span>
+                                    <?php else: ?>
+                                        <span class="price">$<?= number_format($prod['price'], 2) ?></span>
+                                    <?php endif; ?>
                                 </div>
+                                <button class="add-to-cart" data-product-id="<?= $prod['id'] ?>">
+                                    🛒 Add to Cart
+                                </button>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
 
-                <!-- Pagination -->
                 <?php if ($totalPages > 1): ?>
                     <nav class="mt-5">
                         <ul class="pagination justify-content-center">
@@ -204,31 +173,19 @@ $products = $product->getAll($filters); // returns plain array of products
                             unset($queryParams['page']);
                             $baseUrl = '?' . http_build_query($queryParams);
                             $baseUrl = $baseUrl ? $baseUrl . '&' : '?';
-                            ?>
 
-                            <!-- Previous -->
-                            <?php if ($page > 1): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="<?= $baseUrl ?>page=<?= $page - 1 ?>">&laquo;</a>
-                                </li>
-                            <?php endif; ?>
+                            if ($page > 1): ?>
+                                <li class="page-item"><a class="page-link" href="<?= $baseUrl ?>page=<?= $page - 1 ?>">&laquo;</a></li>
+                            <?php endif;
 
-                            <!-- Page numbers -->
-                            <?php
-                            $start = max(1, $page - 2);
-                            $end = min($totalPages, $page + 2);
-                            for ($i = $start; $i <= $end; $i++):
-                            ?>
+                            for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
                                 <li class="page-item <?= $i == $page ? 'active' : '' ?>">
                                     <a class="page-link" href="<?= $baseUrl ?>page=<?= $i ?>"><?= $i ?></a>
                                 </li>
-                            <?php endfor; ?>
+                            <?php endfor;
 
-                            <!-- Next -->
-                            <?php if ($page < $totalPages): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="<?= $baseUrl ?>page=<?= $page + 1 ?>">&raquo;</a>
-                                </li>
+                            if ($page < $totalPages): ?>
+                                <li class="page-item"><a class="page-link" href="<?= $baseUrl ?>page=<?= $page + 1 ?>">&raquo;</a></li>
                             <?php endif; ?>
                         </ul>
                     </nav>
@@ -239,12 +196,11 @@ $products = $product->getAll($filters); // returns plain array of products
 </div>
 
 <script>
+    // Cart functionality (same as index)
     (function() {
-        // Prevent multiple initializations
         if (window.__cartListenerAdded) return;
         window.__cartListenerAdded = true;
 
-        // Toast helper
         function showToast(message, type = 'success') {
             let container = document.getElementById('toast-container');
             if (!container) {
@@ -261,7 +217,6 @@ $products = $product->getAll($filters); // returns plain array of products
             setTimeout(() => toast.remove(), 3000);
         }
 
-        // Update cart badge
         function updateCartCount(count) {
             const cartBadge = document.querySelector('.cart-count');
             if (cartBadge) {
@@ -270,23 +225,13 @@ $products = $product->getAll($filters); // returns plain array of products
             }
         }
 
-        // Global click listener using event delegation
         document.addEventListener('click', async function(e) {
             const addBtn = e.target.closest('.add-to-cart');
             if (!addBtn) return;
-
             e.preventDefault();
-
-            // Don't proceed if already disabled (prevents double clicks)
             if (addBtn.disabled) return;
 
             const productId = addBtn.dataset.productId;
-            if (!productId) return;
-
-            // Get quantity if exists (for product detail page)
-            const quantityInput = document.getElementById('quantity');
-            const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
-
             const originalHtml = addBtn.innerHTML;
             addBtn.disabled = true;
             addBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Adding...';
@@ -299,7 +244,7 @@ $products = $product->getAll($filters); // returns plain array of products
                     },
                     body: JSON.stringify({
                         product_id: productId,
-                        quantity: quantity
+                        quantity: 1
                     })
                 });
                 const result = await response.json();
@@ -307,10 +252,8 @@ $products = $product->getAll($filters); // returns plain array of products
                 if (response.status === 401) {
                     showToast('Please log in to add items to cart', 'danger');
                     setTimeout(() => window.location.href = '/E-Commers-Website/login.php', 1500);
-                    // Keep button disabled during redirect
                     return;
                 }
-
                 if (result.success) {
                     showToast(result.message || 'Item added to cart!', 'success');
                     updateCartCount(result.cart_count);
@@ -318,10 +261,8 @@ $products = $product->getAll($filters); // returns plain array of products
                     showToast(result.message || 'Could not add item', 'danger');
                 }
             } catch (error) {
-                console.error('Cart error:', error);
                 showToast('Something went wrong. Please try again.', 'danger');
             } finally {
-                // Reset button state (if not redirecting)
                 if (addBtn.disabled) {
                     addBtn.disabled = false;
                     addBtn.innerHTML = originalHtml;

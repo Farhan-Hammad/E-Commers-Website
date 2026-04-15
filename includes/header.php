@@ -104,6 +104,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     </li>
 
                     <!-- User Dropdown -->
+                    <!-- User Dropdown -->
+                    <!-- User Dropdown -->
                     <?php if ($user->isLoggedIn()): ?>
                         <?php $currentUser = $user->getCurrentUser(); ?>
                         <li class="nav-item dropdown">
