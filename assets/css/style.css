@@ -1024,3 +1024,487 @@ input[type="number"]::-webkit-outer-spin-button {
 .dark input[type="number"] {
     color-scheme: dark;
 }
+
+/* ===== PRODUCT DETAIL PAGE ENHANCEMENTS ===== */
+
+/* Glass card effect for product info */
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--box-shadow);
+}
+
+/* Main image container */
+.main-image-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-bg);
+}
+
+/* Thumbnail wrapper active state */
+.thumbnail-wrapper {
+    border-radius: var(--border-radius);
+    border: 2px solid transparent;
+    transition: var(--transition);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.thumbnail-wrapper.active {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb, 79, 70, 229), 0.2);
+}
+
+.thumbnail-wrapper:hover {
+    border-color: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+/* Short description background */
+.bg-light {
+    background-color: var(--light) !important;
+}
+
+/* Backdrop blur utility */
+.backdrop-blur {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Fullscreen modal adjustments */
+.modal-fullscreen-md-down {
+    max-width: 100%;
+}
+
+/* ===== READABILITY FIXES FOR DARK MODE ===== */
+
+/* Muted text (e.g., stock count, old price) */
+.text-muted {
+    color: var(--text-muted) !important;
+    opacity: 0.9;
+}
+
+/* Description text in product detail */
+.description-content,
+.short-description p,
+.short-description {
+    color: var(--text-color) !important;
+}
+
+/* Lead text (short description) */
+.lead {
+    color: var(--text-color) !important;
+}
+
+/* Old price (strikethrough) */
+.old-price {
+    color: var(--text-muted) !important;
+}
+
+/* Ensure all paragraph text inherits correctly */
+p,
+.card-body,
+.product-info-card {
+    color: var(--text-color);
+}
+
+/* Badge background opacity for better contrast */
+.badge.bg-primary {
+    background-color: var(--primary) !important;
+    color: white !important;
+}
+
+.badge.bg-secondary {
+    background-color: var(--secondary) !important;
+    color: white !important;
+}
+
+.badge.bg-opacity-10 {
+    --bs-bg-opacity: 0.15;
+}
+
+/* Short description background */
+.bg-light.bg-opacity-50 {
+    background-color: var(--light) !important;
+    border: 1px solid var(--border-color);
+}
+
+/* ===== CART PAGE ENHANCEMENTS ===== */
+
+/* Cart item image */
+.cart-item-image {
+    background: var(--light);
+    border: 1px solid var(--border-color);
+}
+
+/* Quantity control styling */
+.quantity-control {
+    border: 1px solid var(--border-color);
+}
+
+.quantity-control .btn-link {
+    color: var(--text-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.quantity-control .btn-link:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.quantity-control input {
+    color: var(--text-color);
+}
+
+.quantity-control input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Remove spinner from number input */
+.quantity-control input[type="number"]::-webkit-outer-spin-button,
+.quantity-control input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Sticky order summary */
+.sticky-top {
+    z-index: 10;
+}
+
+/* Table header border */
+.table thead tr {
+    border-bottom-width: 2px;
+}
+
+/* Empty cart icon */
+.fa-shopping-cart.opacity-50 {
+    opacity: 0.3;
+}
+
+/* ===== CART TABLE THEME FIX ===== */
+
+/* Make table background transparent to show glass-card background */
+.table {
+    --bs-table-bg: transparent !important;
+    --bs-table-color: var(--text-color) !important;
+    --bs-table-border-color: var(--border-color) !important;
+    background-color: transparent !important;
+    color: var(--text-color) !important;
+}
+
+/* Table header */
+.table thead th {
+    background-color: transparent !important;
+    color: var(--text-muted) !important;
+    border-bottom-color: var(--border-color) !important;
+}
+
+/* Table rows */
+.table tbody tr {
+    background-color: transparent !important;
+    border-bottom-color: var(--border-color) !important;
+}
+
+.table tbody tr:hover {
+    background-color: var(--light) !important;
+}
+
+/* Ensure glass-card has proper background */
+.glass-card {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid var(--glass-border) !important;
+}
+
+/* Quantity control background */
+.quantity-control {
+    background: var(--light) !important;
+    border-color: var(--border-color) !important;
+}
+
+.quantity-control .btn-link {
+    color: var(--text-color) !important;
+}
+
+.quantity-control .btn-link:hover {
+    background: var(--primary) !important;
+    color: white !important;
+}
+
+/* Cart item image container */
+.cart-item-image {
+    background: var(--light) !important;
+    border-color: var(--border-color) !important;
+}
+
+
+
+
+
+.cart-count {
+    position: absolute;
+    top: -6px;
+    right: -10px;
+    background: var(--primary);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    border-radius: 50px;
+    padding: 0 5px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border: 1.5px solid var(--card-bg);
+    transition: var(--transition);
+}
+
+/* Dark mode adjustment for better contrast */
+.dark .cart-count {
+    background: var(--primary-light);
+    color: var(--dark);
+    border-color: var(--body-bg);
+}
+
+/* Hide when count is 0 (optional, but cleaner) */
+.cart-count[style*="display: none"] {
+    display: none !important;
+}
+
+/* ===== DROPDOWN Z-INDEX FIX ===== */
+.navbar {
+    z-index: 1030;
+    /* Ensure navbar is above content but below dropdown */
+    overflow: visible !important;
+    /* Allow dropdown to overflow */
+}
+
+.navbar .dropdown-menu {
+    z-index: 1050 !important;
+    /* Higher than navbar */
+    position: absolute;
+    margin-top: 0.5rem;
+}
+
+/* Also fix any potential stacking context issues */
+.dropdown,
+.nav-item.dropdown {
+    position: relative;
+    z-index: auto;
+}
+
+/* Ensure the dropdown toggle doesn't clip */
+.nav-link.dropdown-toggle {
+    position: relative;
+    z-index: 1;
+}
+
+/* ===== CHECKOUT PAGE ENHANCEMENTS ===== */
+
+/* Sticky order summary */
+.sticky-top {
+    z-index: 10;
+}
+
+/* Form control enhancements for glass design */
+.form-control,
+.form-select {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--card-bg) !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15) !important;
+}
+
+.form-control::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 0.6;
+}
+
+/* Payment method card */
+.glass-card .border-success {
+    border-color: var(--success) !important;
+}
+
+/* Scrollable cart items preview */
+.order-summary-items::-webkit-scrollbar {
+    width: 4px;
+}
+
+.order-summary-items::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+
+/* ===== ORDER CONFIRMATION ENHANCEMENTS ===== */
+
+/* Success checkmark animation */
+.success-animation {
+    margin-bottom: 1rem;
+}
+
+/* Table theme override for confirmation page */
+.table {
+    --bs-table-bg: transparent !important;
+    color: var(--text-color) !important;
+}
+
+.table thead th {
+    background: transparent !important;
+    border-bottom-width: 2px;
+}
+
+.table tbody tr {
+    background: transparent !important;
+}
+
+.table tfoot tr {
+    background: transparent !important;
+}
+
+/* Badge enhancements */
+.badge.bg-opacity-10 {
+    --bs-bg-opacity: 0.1;
+    font-weight: 500;
+}
+
+/* ===== ORDERS PAGE ENHANCEMENTS ===== */
+
+/* Table header and rows theme override */
+.table {
+    --bs-table-bg: transparent !important;
+    color: var(--text-color) !important;
+}
+
+.table thead th {
+    background: transparent !important;
+    border-bottom-color: var(--border-color) !important;
+}
+
+.table tbody tr {
+    background: transparent !important;
+    border-bottom-color: var(--border-color) !important;
+}
+
+.table tbody tr:hover {
+    background: var(--light) !important;
+}
+
+/* Status badge background opacities */
+.badge.bg-opacity-10 {
+    --bs-bg-opacity: 0.12;
+    font-weight: 500;
+}
+
+/* Empty state icon circle */
+.icon-circle.bg-primary.bg-opacity-10 {
+    background: rgba(var(--primary-rgb), 0.1) !important;
+}
+
+/* ===== ORDER DETAIL PAGE ENHANCEMENTS ===== */
+
+/* Table theme override */
+.table {
+    --bs-table-bg: transparent !important;
+    color: var(--text-color) !important;
+}
+
+.table thead th {
+    background: transparent !important;
+    border-bottom-color: var(--border-color) !important;
+}
+
+.table tbody tr {
+    background: transparent !important;
+    border-bottom-color: var(--border-color) !important;
+}
+
+.table tbody tr:hover {
+    background: var(--light) !important;
+}
+
+.table tfoot tr {
+    background: transparent !important;
+    border-top-color: var(--border-color) !important;
+}
+
+/* Status badge opacities */
+.badge.bg-opacity-10 {
+    --bs-bg-opacity: 0.12;
+    font-weight: 500;
+}
+
+/* Icon circles */
+.icon-circle.bg-primary.bg-opacity-10 {
+    background: rgba(var(--primary-rgb), 0.1) !important;
+}
+
+.icon-circle.bg-info.bg-opacity-10 {
+    background: rgba(var(--info-rgb), 0.1) !important;
+}
+
+/* ===== PROFILE PAGE ENHANCEMENTS ===== */
+
+/* Input group with toggle button */
+.input-group .btn-outline-secondary {
+    border-left: none;
+    background: var(--card-bg);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+.input-group .form-control:focus+.btn-outline-secondary {
+    border-color: var(--primary);
+}
+
+/* Disabled input styling */
+.form-control:disabled {
+    background-color: var(--light) !important;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Alert enhancements */
+.alert {
+    background: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+.alert-success {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: var(--success);
+}
+
+.alert-danger {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: var(--danger);
+}
+
+/* Form labels */
+.form-label {
+    color: var(--text-color);
+}
+
+/* Glass card height consistency */
+.glass-card.h-100 {
+    height: 100%;
+}

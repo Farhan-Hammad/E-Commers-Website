@@ -97,9 +97,9 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <li class="nav-item me-2">
                         <a class="nav-link position-relative" href="/E-Commers-Website/pages/cart.php">
                             <i class="fas fa-shopping-cart fa-lg"></i>
-                            <?php if ($cartCount > 0): ?>
-                                <span class="cart-count"><?= $cartCount ?></span>
-                            <?php endif; ?>
+                            <span class="cart-count" style="display: <?= $cartCount > 0 ? 'inline-block' : 'none' ?>;">
+                                <?= $cartCount ?>
+                            </span>
                         </a>
                     </li>
 

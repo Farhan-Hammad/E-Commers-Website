@@ -16,95 +16,132 @@ $isEmpty = $cart->isEmpty();
 ?>
 
 <div class="container py-5">
-    <h1 class="mb-4">Shopping Cart</h1>
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h1 class="display-5 fw-bold mb-0">
+            <i class="fas fa-shopping-bag me-3 text-primary"></i>Shopping Cart
+        </h1>
+        <span class="badge bg-primary bg-opacity-10 text-primary px-4 py-2 rounded-pill fs-6">
+            <?= count($cartItems) ?> item<?= count($cartItems) !== 1 ? 's' : '' ?>
+        </span>
+    </div>
 
     <?php if ($isEmpty): ?>
-        <div class="alert alert-info">
-            Your cart is empty. <a href="products.php" class="alert-link">Continue shopping</a>
+        <div class="glass-card rounded-4 p-5 text-center">
+            <div class="py-5">
+                <i class="fas fa-shopping-cart fa-4x text-muted mb-4 opacity-50"></i>
+                <h3 class="mb-3">Your cart is empty</h3>
+                <p class="text-muted mb-4">Looks like you haven't added anything yet.</p>
+                <a href="products.php" class="btn btn-primary btn-lg px-5 rounded-pill">
+                    <i class="fas fa-arrow-left me-2"></i>Start Shopping
+                </a>
+            </div>
         </div>
     <?php else: ?>
-        <div class="row">
+        <div class="row g-4">
+            <!-- Cart Items Section -->
             <div class="col-lg-8">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>Price</th>
-                                        <th style="width: 120px;">Quantity</th>
-                                        <th>Total</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($cartItems as $item): ?>
-                                        <tr data-product-id="<?= $item['product_id'] ?>">
-                                            <td>
-                                                <div class="d-flex align-items-center">
+                <div class="glass-card rounded-4 overflow-hidden">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="border-bottom">
+                                <tr>
+                                    <th class="ps-4 py-3 text-muted fw-semibold">Product</th>
+                                    <th class="py-3 text-muted fw-semibold">Price</th>
+                                    <th class="py-3 text-muted fw-semibold text-center">Quantity</th>
+                                    <th class="py-3 text-muted fw-semibold">Total</th>
+                                    <th class="pe-4 py-3"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($cartItems as $item): ?>
+                                    <tr class="border-bottom" data-product-id="<?= $item['product_id'] ?>">
+                                        <td class="ps-4 py-4">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="cart-item-image rounded-3 overflow-hidden" style="width: 80px; height: 80px;">
                                                     <img src="<?= htmlspecialchars($item['image']) ?>"
                                                         alt="<?= htmlspecialchars($item['name']) ?>"
-                                                        style="width: 60px; height: 60px; object-fit: cover;"
-                                                        class="me-3 rounded">
-                                                    <div>
-                                                        <a href="product-detail.php?slug=<?= urlencode($item['slug']) ?>" class="text-decoration-none">
-                                                            <h6 class="mb-0"><?= htmlspecialchars($item['name']) ?></h6>
-                                                        </a>
+                                                        class="w-100 h-100 object-fit-cover">
+                                                </div>
+                                                <div>
+                                                    <a href="product-detail.php?slug=<?= urlencode($item['slug']) ?>"
+                                                        class="fw-semibold text-decoration-none fs-5">
+                                                        <?= htmlspecialchars($item['name']) ?>
+                                                    </a>
+                                                    <div class="text-muted small mt-1">
+                                                        SKU: <?= htmlspecialchars($item['product_id']) ?>
                                                     </div>
                                                 </div>
-                                            </td>
-                                            <td>$<?= number_format($item['price'], 2) ?></td>
-                                            <td>
-                                                <div class="input-group input-group-sm">
-                                                    <button class="btn btn-outline-secondary cart-qty-btn" data-action="decrease">-</button>
-                                                    <input type="number" class="form-control text-center cart-qty-input"
+                                            </div>
+                                        </td>
+                                        <td class="py-4 fw-semibold">$<?= number_format($item['price'], 2) ?></td>
+                                        <td class="py-4">
+                                            <div class="d-flex justify-content-center">
+                                                <div class="quantity-control d-flex align-items-center gap-1 rounded-pill p-1"
+                                                    style="background: var(--light); max-width: 140px;">
+                                                    <button class="btn btn-link text-decoration-none cart-qty-btn"
+                                                        data-action="decrease" style="width: 36px; height: 36px;">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                    <input type="number"
+                                                        class="form-control border-0 bg-transparent text-center fw-semibold cart-qty-input"
                                                         value="<?= $item['quantity'] ?>" min="1" max="<?= $item['stock'] ?>"
-                                                        style="max-width: 60px;">
-                                                    <button class="btn btn-outline-secondary cart-qty-btn" data-action="increase">+</button>
+                                                        style="width: 50px; -moz-appearance: textfield;">
+                                                    <button class="btn btn-link text-decoration-none cart-qty-btn"
+                                                        data-action="increase" style="width: 36px; height: 36px;">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
                                                 </div>
-                                            </td>
-                                            <td class="item-subtotal">$<?= number_format($item['subtotal'], 2) ?></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-danger cart-remove">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 fw-bold fs-5 item-subtotal">$<?= number_format($item['subtotal'], 2) ?></td>
+                                        <td class="pe-4 py-4">
+                                            <button class="btn btn-outline-danger btn-sm rounded-circle cart-remove"
+                                                style="width: 36px; height: 36px;">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                <div class="mt-3">
-                    <a href="products.php" class="btn btn-outline-primary">
-                        <i class="fas fa-arrow-left"></i> Continue Shopping
+
+                <div class="mt-4 d-flex">
+                    <a href="products.php" class="btn btn-outline-primary rounded-pill px-4 py-2">
+                        <i class="fas fa-arrow-left me-2"></i>Continue Shopping
                     </a>
                 </div>
             </div>
+
+            <!-- Order Summary -->
             <div class="col-lg-4">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0">Order Summary</h5>
+                <div class="glass-card rounded-4 p-4 sticky-top" style="top: 90px;">
+                    <h5 class="fw-bold mb-4 pb-2 border-bottom">Order Summary</h5>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Subtotal</span>
+                        <span class="fw-semibold" id="cart-subtotal">$<?= number_format($subtotal, 2) ?></span>
                     </div>
-                    <div class="card-body">
-                        <dl class="row">
-                            <dt class="col-6">Subtotal</dt>
-                            <dd class="col-6 text-end" id="cart-subtotal">$<?= number_format($subtotal, 2) ?></dd>
-                            <dt class="col-6">Shipping</dt>
-                            <dd class="col-6 text-end">Calculated at checkout</dd>
-                            <dt class="col-6">Tax</dt>
-                            <dd class="col-6 text-end">Calculated at checkout</dd>
-                        </dl>
-                        <hr>
-                        <div class="d-flex justify-content-between fw-bold mb-3">
-                            <span>Total</span>
-                            <span id="cart-total">$<?= number_format($subtotal, 2) ?></span>
-                        </div>
-                        <a href="checkout.php" class="btn btn-primary w-100 <?= $isEmpty ? 'disabled' : '' ?>">
-                            Proceed to Checkout
-                        </a>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Shipping</span>
+                        <span class="text-success">Free</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Tax</span>
+                        <span class="text-muted">Calculated at checkout</span>
+                    </div>
+                    <hr class="my-3">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="fw-bold fs-5">Total</span>
+                        <span class="fw-bold fs-4" id="cart-total">$<?= number_format($subtotal, 2) ?></span>
+                    </div>
+                    <a href="checkout.php" class="btn btn-primary w-100 py-3 rounded-pill fw-semibold">
+                        <i class="fas fa-lock me-2"></i>Proceed to Checkout
+                    </a>
+                    <div class="mt-3 text-center">
+                        <small class="text-muted">
+                            <i class="fas fa-shield-alt me-1"></i>Secure checkout
+                        </small>
                     </div>
                 </div>
             </div>
@@ -160,13 +197,17 @@ $isEmpty = $cart->isEmpty();
                 });
         }
 
+        // Quantity controls
         document.querySelectorAll('.cart-qty-btn').forEach(btn => {
             btn.addEventListener('click', async function() {
                 const row = this.closest('tr');
                 const input = row.querySelector('.cart-qty-input');
                 let newQty = parseInt(input.value);
-                if (this.dataset.action === 'increase') newQty = Math.min(newQty + 1, parseInt(input.max));
-                else newQty = Math.max(newQty - 1, 1);
+                if (this.dataset.action === 'increase') {
+                    newQty = Math.min(newQty + 1, parseInt(input.max));
+                } else {
+                    newQty = Math.max(newQty - 1, 1);
+                }
                 input.value = newQty;
                 await updateCartItem(row.dataset.productId, newQty);
             });
@@ -182,11 +223,12 @@ $isEmpty = $cart->isEmpty();
             });
         });
 
+        // Remove item
         document.querySelectorAll('.cart-remove').forEach(btn => {
             btn.addEventListener('click', async function() {
                 const row = this.closest('tr');
                 const productId = row.dataset.productId;
-                if (!confirm('Remove this item?')) return;
+                if (!confirm('Remove this item from your cart?')) return;
                 try {
                     const response = await fetch('/E-Commers-Website/api/cart/remove.php', {
                         method: 'POST',
@@ -209,6 +251,9 @@ $isEmpty = $cart->isEmpty();
                 }
             });
         });
+
+        // Initial header cart count sync
+        updateHeaderCartCount();
     });
 </script>
 
