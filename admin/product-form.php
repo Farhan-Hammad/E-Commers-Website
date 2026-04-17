@@ -90,105 +90,112 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Now include header (output starts here)
-require_once '../includes/header.php';
+$pageTitle = $isEdit ? 'Edit Product' : 'Add New Product';
+require_once 'header.php'; // Admin header
 ?>
 
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <nav class="col-md-2 d-md-block bg-light sidebar" style="min-height: 100vh;">
-            <div class="position-sticky pt-3">
-                <ul class="nav flex-column">
-                    <li class="nav-item"><a class="nav-link" href="/E-Commers-Website/admin/dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="/E-Commers-Website/admin/products.php"><i class="fas fa-box"></i> Products</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/E-Commers-Website/admin/categories.php"><i class="fas fa-tags"></i> Categories</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/E-Commers-Website/admin/orders.php"><i class="fas fa-shopping-cart"></i> Orders</a></li>
-                    <li class="nav-item"><a class="nav-link text-danger" href="/E-Commers-Website/logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                </ul>
-            </div>
-        </nav>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0"><?= $isEdit ? 'Edit' : 'Add New' ?> Product</h2>
+    <a href="/E-Commers-Website/admin/products.php" class="btn-admin-outline text-decoration-none">
+        <i class="fas fa-arrow-left"></i> Back to Products
+    </a>
+</div>
 
-        <main class="col-md-10 ms-sm-auto px-md-4 py-4">
-            <h1 class="h2 mb-4"><?= $isEdit ? 'Edit' : 'Add New' ?> Product</h1>
+<?php if (!empty($error)): ?>
+    <div class="alert alert-danger alert-dismissible fade show rounded-3 border-0" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i><?= htmlspecialchars($error) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
 
-            <?php if (!empty($error)): ?>
-                <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
-            <?php endif; ?>
-
-            <form method="POST" enctype="multipart/form-data" class="bg-white p-4 rounded shadow-sm">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Name *</label>
-                        <input type="text" name="name" class="form-control" required value="<?= htmlspecialchars($product['name'] ?? '') ?>">
+<div class="admin-card">
+    <div class="admin-card-body p-4">
+        <form method="POST" enctype="multipart/form-data">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Name *</label>
+                    <input type="text" name="name" class="admin-form-control" required
+                        value="<?= htmlspecialchars($product['name'] ?? '') ?>">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Category *</label>
+                    <select name="category_id" class="admin-form-control" required>
+                        <option value="">Select...</option>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?= $cat['id'] ?>" <?= ($product['category_id'] ?? '') == $cat['id'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($cat['name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Price *</label>
+                    <input type="number" step="0.01" name="price" class="admin-form-control" required
+                        value="<?= $product['price'] ?? '' ?>">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Sale Price</label>
+                    <input type="number" step="0.01" name="sale_price" class="admin-form-control"
+                        value="<?= $product['sale_price'] ?? '' ?>">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Stock Quantity *</label>
+                    <input type="number" name="stock_quantity" class="admin-form-control" required
+                        value="<?= $product['stock_quantity'] ?? 0 ?>">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">SKU *</label>
+                    <input type="text" name="sku" class="admin-form-control" required
+                        value="<?= htmlspecialchars($product['sku'] ?? '') ?>">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Status</label>
+                    <select name="status" class="admin-form-control">
+                        <option value="active" <?= ($product['status'] ?? '') == 'active' ? 'selected' : '' ?>>Active</option>
+                        <option value="inactive" <?= ($product['status'] ?? '') == 'inactive' ? 'selected' : '' ?>>Inactive</option>
+                        <option value="out_of_stock" <?= ($product['status'] ?? '') == 'out_of_stock' ? 'selected' : '' ?>>Out of Stock</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="featured" id="featured"
+                            <?= isset($product['featured']) && $product['featured'] ? 'checked' : '' ?>>
+                        <label class="form-check-label fw-semibold" for="featured">Featured Product</label>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Category *</label>
-                        <select name="category_id" class="form-select" required>
-                            <option value="">Select...</option>
-                            <?php foreach ($categories as $cat): ?>
-                                <option value="<?= $cat['id'] ?>" <?= ($product['category_id'] ?? '') == $cat['id'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Price *</label>
-                        <input type="number" step="0.01" name="price" class="form-control" required value="<?= $product['price'] ?? '' ?>">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Sale Price</label>
-                        <input type="number" step="0.01" name="sale_price" class="form-control" value="<?= $product['sale_price'] ?? '' ?>">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Stock Quantity *</label>
-                        <input type="number" name="stock_quantity" class="form-control" required value="<?= $product['stock_quantity'] ?? 0 ?>">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">SKU *</label>
-                        <input type="text" name="sku" class="form-control" required value="<?= htmlspecialchars($product['sku'] ?? '') ?>">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Status</label>
-                        <select name="status" class="form-select">
-                            <option value="active" <?= ($product['status'] ?? '') == 'active' ? 'selected' : '' ?>>Active</option>
-                            <option value="inactive" <?= ($product['status'] ?? '') == 'inactive' ? 'selected' : '' ?>>Inactive</option>
-                            <option value="out_of_stock" <?= ($product['status'] ?? '') == 'out_of_stock' ? 'selected' : '' ?>>Out of Stock</option>
-                        </select>
-                    </div>
-                    <div class="col-12">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="featured" id="featured" <?= isset($product['featured']) && $product['featured'] ? 'checked' : '' ?>>
-                            <label class="form-check-label" for="featured">Featured Product</label>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Product Images</label>
-                        <input type="file" name="images[]" class="form-control" accept="image/*" multiple>
-                        <small class="text-muted">You can select multiple images. First image will be the main thumbnail.</small>
-                        <?php if ($isEdit && !empty($product['images'])): ?>
-                            <div class="mt-2">
-                                <p>Current Images:</p>
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Product Images</label>
+                    <input type="file" name="images[]" class="admin-form-control" accept="image/*" multiple>
+                    <small class="text-muted d-block mt-1">You can select multiple images. First image will be the main thumbnail.</small>
+                    <?php if ($isEdit && !empty($product['images'])): ?>
+                        <div class="mt-3">
+                            <p class="fw-semibold mb-2">Current Images:</p>
+                            <div class="d-flex flex-wrap gap-2">
                                 <?php foreach (json_decode($product['images'], true) as $img): ?>
-                                    <img src="<?= htmlspecialchars($img) ?>" width="80" height="80" style="object-fit: cover; margin-right: 5px;" class="border rounded">
+                                    <img src="<?= htmlspecialchars($img) ?>" width="80" height="80"
+                                        style="object-fit: cover;" class="border rounded-2">
                                 <?php endforeach; ?>
                             </div>
-                        <?php endif; ?>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Short Description</label>
-                        <textarea name="short_description" class="form-control" rows="2"><?= htmlspecialchars($product['short_description'] ?? '') ?></textarea>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Full Description</label>
-                        <textarea name="description" class="form-control" rows="5"><?= htmlspecialchars($product['description'] ?? '') ?></textarea>
-                    </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary">Save Product</button>
-                    <a href="/E-Commers-Website/admin/products.php" class="btn btn-secondary">Cancel</a>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Short Description</label>
+                    <textarea name="short_description" class="admin-form-control" rows="2"><?= htmlspecialchars($product['short_description'] ?? '') ?></textarea>
                 </div>
-            </form>
-        </main>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Full Description</label>
+                    <textarea name="description" class="admin-form-control" rows="5"><?= htmlspecialchars($product['description'] ?? '') ?></textarea>
+                </div>
+            </div>
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn-admin">
+                    <i class="fas fa-save me-1"></i> Save Product
+                </button>
+                <a href="/E-Commers-Website/admin/products.php" class="btn-admin-outline text-decoration-none">Cancel</a>
+            </div>
+        </form>
     </div>
 </div>
-<?php require_once '../includes/footer.php'; ?>
+
+<?php require_once 'footer.php'; ?>

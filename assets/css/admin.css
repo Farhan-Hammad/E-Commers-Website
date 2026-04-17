@@ -492,3 +492,187 @@
     border: 1px solid rgba(249, 115, 22, 0.2);
     backdrop-filter: blur(4px);
 }
+
+.admin-form-control {
+    background: var(--admin-card-bg);
+    border: 1px solid var(--admin-border);
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    color: var(--admin-text);
+    width: 100%;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+
+.admin-form-control:focus {
+    outline: none;
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+}
+
+.modal-content {
+    background: var(--admin-card-bg);
+    color: var(--admin-text);
+}
+
+.modal-header .btn-close {
+    filter: invert(var(--dark-mode-invert, 0));
+}
+
+.btn-admin,
+.btn-admin-outline,
+a.btn-admin,
+a.btn-admin-outline {
+    text-decoration: none !important;
+}
+
+.btn-admin:hover,
+.btn-admin-outline:hover {
+    text-decoration: none !important;
+}
+
+.admin-card-body p {
+    margin-bottom: 0.5rem;
+}
+
+.admin-card-body hr {
+    border-color: var(--admin-border);
+    opacity: 0.5;
+}
+
+.badge-admin {
+    display: inline-block;
+    padding: 0.3rem 0.9rem;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.3px;
+}
+
+.badge-admin.orange {
+    background: rgba(249, 115, 22, 0.12);
+    color: #ea580c;
+}
+
+.badge-admin.red {
+    background: rgba(220, 38, 38, 0.12);
+    color: #dc2626;
+}
+
+.badge-admin.green {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+}
+
+.admin-pagination .page-link {
+    background: var(--admin-card-bg);
+    border-color: var(--admin-border);
+    color: var(--admin-text);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    margin: 0 3px;
+    transition: all 0.2s;
+}
+
+.admin-pagination .page-item.active .page-link {
+    background: var(--admin-primary);
+    border-color: var(--admin-primary);
+    color: white;
+}
+
+.admin-pagination .page-link:hover {
+    background: var(--admin-primary);
+    color: white;
+    border-color: var(--admin-primary);
+}
+
+.badge-admin.green {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+}
+
+.badge-admin.red {
+    background: rgba(220, 38, 38, 0.12);
+    color: #dc2626;
+}
+
+.admin-form-control {
+    background: var(--admin-card-bg);
+    border: 1px solid var(--admin-border);
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    color: var(--admin-text);
+    width: 100%;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+
+.admin-form-control:focus {
+    outline: none;
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+}
+
+textarea.admin-form-control {
+    resize: vertical;
+}
+
+.form-check-input:checked {
+    background-color: var(--admin-primary);
+    border-color: var(--admin-primary);
+}
+
+/* Chart canvas background (optional) */
+.admin-card canvas {
+    max-height: 100%;
+}
+
+/* Tooltip and legend dark mode support */
+.dark .admin-card canvas {
+    filter: brightness(0.9);
+}
+
+/* ===== ENHANCED PAGE TITLE ===== */
+.title-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(145deg, var(--admin-primary), var(--admin-primary-dark));
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 16px -4px rgba(249, 115, 22, 0.25);
+}
+
+.title-icon i {
+    font-size: 1.5rem;
+    color: white;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(145deg, var(--admin-text) 0%, var(--admin-primary) 80%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: -0.02em;
+    position: relative;
+}
+
+/* User badge */
+.admin-user-badge {
+    background: var(--admin-card-bg);
+    padding: 0.5rem 1.25rem;
+    border-radius: 40px;
+    border: 1px solid var(--admin-border);
+    box-shadow: var(--admin-shadow);
+    color: var(--admin-text);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    backdrop-filter: blur(4px);
+}
+
+.admin-user-badge i {
+    color: var(--admin-primary);
+    font-size: 1.1rem;
+}

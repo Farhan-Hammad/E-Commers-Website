@@ -31,6 +31,9 @@ $currentUser = $user->getCurrentUser();
 
     <!-- Admin CSS (Orange/Red theme) -->
     <link rel="stylesheet" href="/E-Commers-Website/assets/css/admin.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 
 <body class="admin-panel">
@@ -87,18 +90,29 @@ $currentUser = $user->getCurrentUser();
             </nav>
 
             <!-- Main Content Area -->
+            <!-- Main Content Area -->
             <main class="col-md-10 ms-sm-auto px-md-4 py-4">
-                <!-- Top Bar -->
+                <!-- Top Bar with Enhanced Title -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <h2 class="fw-bold mb-0" style="color: var(--admin-text);">
+                    <div class="d-flex align-items-center">
+                        <div class="title-icon me-3">
+                            <?php
+                            // Dynamic icon based on page
+                            $titleIcon = 'fa-chart-pie';
+                            if (strpos($_SERVER['PHP_SELF'], 'products') !== false) $titleIcon = 'fa-box';
+                            elseif (strpos($_SERVER['PHP_SELF'], 'categories') !== false) $titleIcon = 'fa-tags';
+                            elseif (strpos($_SERVER['PHP_SELF'], 'orders') !== false) $titleIcon = 'fa-shopping-cart';
+                            ?>
+                            <i class="fas <?= $titleIcon ?>"></i>
+                        </div>
+                        <h2 class="page-title mb-0">
                             <?= $pageTitle ?? 'Dashboard' ?>
                         </h2>
                     </div>
                     <div class="d-flex align-items-center gap-3">
-                        <span class="text-muted">
+                        <div class="admin-user-badge">
                             <i class="fas fa-user-circle me-1"></i>
-                            <?= htmlspecialchars($currentUser['name'] ?? 'Admin') ?>
-                        </span>
+                            <span><?= htmlspecialchars($currentUser['name'] ?? 'Admin') ?></span>
+                        </div>
                     </div>
                 </div>

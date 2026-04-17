@@ -12,30 +12,19 @@ if (isset($_POST['update_status'])) {
     $orderId = (int)$_POST['order_id'];
     $newStatus = $_POST['status'];
 
-    // Get current status
     $stmt = $db->prepare("SELECT status FROM orders WHERE id = ?");
     $stmt->execute([$orderId]);
     $oldStatus = $stmt->fetchColumn();
 
-    // Update the order status
     $updateStmt = $db->prepare("UPDATE orders SET status = ? WHERE id = ?");
     $updateStmt->execute([$newStatus, $orderId]);
 
-    // Restore stock if cancelled
     if ($newStatus === 'cancelled' && $oldStatus !== 'cancelled') {
-        $itemsStmt = $db->prepare("
-            SELECT product_id, quantity 
-            FROM order_items 
-            WHERE order_id = ?
-        ");
+        $itemsStmt = $db->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
         $itemsStmt->execute([$orderId]);
         $items = $itemsStmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $restoreStmt = $db->prepare("
-            UPDATE products 
-            SET stock_quantity = stock_quantity + ? 
-            WHERE id = ?
-        ");
+        $restoreStmt = $db->prepare("UPDATE products SET stock_quantity = stock_quantity + ? WHERE id = ?");
         foreach ($items as $item) {
             $restoreStmt->execute([$item['quantity'], $item['product_id']]);
         }
@@ -45,10 +34,9 @@ if (isset($_POST['update_status'])) {
     exit;
 }
 
-// Include header after processing POST
-require_once '../includes/header.php';
+$pageTitle = 'Orders';
+require_once 'header.php'; // Admin header
 
-// Get all orders with pagination
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $perPage = 15;
 $offset = ($page - 1) * $perPage;
@@ -65,100 +53,78 @@ $orders = $db->query("
 ")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <nav class="col-md-2 d-md-block bg-light sidebar" style="min-height: 100vh;">
-            <div class="position-sticky pt-3">
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : '' ?>" href="/E-Commers-Website/admin/dashboard.php">
-                            <i class="fas fa-tachometer-alt"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'products.php' ? 'active' : '' ?>" href="/E-Commers-Website/admin/products.php">
-                            <i class="fas fa-box"></i> Products
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'categories.php' ? 'active' : '' ?>" href="/E-Commers-Website/admin/categories.php">
-                            <i class="fas fa-tags"></i> Categories
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'orders.php' ? 'active' : '' ?>" href="/E-Commers-Website/admin/orders.php">
-                            <i class="fas fa-shopping-cart"></i> Orders
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-danger" href="/E-Commers-Website/logout.php">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+<div class="d-flex justify-content-between align-items-center mb-4">
 
-        <!-- Main Content -->
-        <main class="col-md-10 ms-sm-auto px-md-4 py-4">
-            <h1 class="h2 mb-4">Orders</h1>
+</div>
 
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-light">
+<div class="admin-card">
+    <div class="admin-card-header">
+        <i class="fas fa-list me-2"></i>All Orders
+    </div>
+    <div class="admin-card-body p-0">
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Customer</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($orders as $order): ?>
                         <tr>
-                            <th>Order #</th>
-                            <th>Customer</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                            <th>Actions</th>
+                            <td><span class="fw-semibold"><?= htmlspecialchars($order['order_number']) ?></span></td>
+                            <td><?= htmlspecialchars($order['shipping_name']) ?></td>
+                            <td>$<?= number_format($order['total_amount'], 2) ?></td>
+                            <td>
+                                <form method="POST" class="d-flex align-items-center gap-2">
+                                    <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
+                                    <select name="status" class="admin-form-control form-select-sm py-1" style="width: auto; min-width: 120px;">
+                                        <option value="pending" <?= $order['status'] == 'pending' ? 'selected' : '' ?>>Pending</option>
+                                        <option value="processing" <?= $order['status'] == 'processing' ? 'selected' : '' ?>>Processing</option>
+                                        <option value="completed" <?= $order['status'] == 'completed' ? 'selected' : '' ?>>Completed</option>
+                                        <option value="cancelled" <?= $order['status'] == 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
+                                    </select>
+                                    <button type="submit" name="update_status" class="btn-admin-outline btn-sm py-1">
+                                        Update
+                                    </button>
+                                </form>
+                            </td>
+                            <td><?= date('M j, Y', strtotime($order['created_at'])) ?></td>
+                            <td>
+                                <a href="/E-Commers-Website/admin/order-detail.php?id=<?= $order['id'] ?>"
+                                    class="btn-admin-outline btn-sm text-decoration-none">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($orders as $order): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($order['order_number']) ?></td>
-                                <td><?= htmlspecialchars($order['shipping_name']) ?></td>
-                                <td>$<?= number_format($order['total_amount'], 2) ?></td>
-                                <td>
-                                    <form method="POST" class="d-flex gap-2">
-                                        <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
-                                        <select name="status" class="form-select form-select-sm" style="width: auto;">
-                                            <option value="pending" <?= $order['status'] == 'pending' ? 'selected' : '' ?>>Pending</option>
-                                            <option value="processing" <?= $order['status'] == 'processing' ? 'selected' : '' ?>>Processing</option>
-                                            <option value="completed" <?= $order['status'] == 'completed' ? 'selected' : '' ?>>Completed</option>
-                                            <option value="cancelled" <?= $order['status'] == 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
-                                        </select>
-                                        <button type="submit" name="update_status" class="btn btn-sm btn-outline-primary">Update</button>
-                                    </form>
-                                </td>
-                                <td><?= date('M j, Y', strtotime($order['created_at'])) ?></td>
-                                <td>
-                                    <a href="/E-Commers-Website/admin/order-detail.php?id=<?= $order['id'] ?>"
-                                        class="btn btn-sm btn-outline-info">View</a>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            <?php if ($totalPages > 1): ?>
-                <nav class="mt-4">
-                    <ul class="pagination">
-                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                            <li class="page-item <?= $i == $page ? 'active' : '' ?>">
-                                <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
-                            </li>
-                        <?php endfor; ?>
-                    </ul>
-                </nav>
-            <?php endif; ?>
-        </main>
+                    <?php endforeach; ?>
+                    <?php if (empty($orders)): ?>
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">No orders found.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
-<?php require_once '../includes/footer.php'; ?>
+<!-- Pagination -->
+<?php if ($totalPages > 1): ?>
+    <nav class="mt-4">
+        <ul class="admin-pagination pagination">
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                <li class="page-item <?= $i == $page ? 'active' : '' ?>">
+                    <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                </li>
+            <?php endfor; ?>
+        </ul>
+    </nav>
+<?php endif; ?>
+
+<?php require_once 'footer.php'; ?>
