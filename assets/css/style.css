@@ -1508,3 +1508,229 @@ p,
 .glass-card.h-100 {
     height: 100%;
 }
+
+/* ===== QUANTITY CONTROL FIX ===== */
+.quantity-control {
+    display: inline-flex;
+    align-items: center;
+    background: var(--light);
+    border: 1px solid var(--border-color);
+    border-radius: 50px;
+    padding: 0.25rem;
+    gap: 0.25rem;
+}
+
+.quantity-control .cart-qty-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--text-color);
+    border: none;
+    transition: var(--transition);
+}
+
+.quantity-control .cart-qty-btn:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.quantity-control .cart-qty-input {
+    width: 55px;
+    text-align: center;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 1rem;
+    padding: 0.25rem 0;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.quantity-control .cart-qty-input::-webkit-outer-spin-button,
+.quantity-control .cart-qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.quantity-control .cart-qty-input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* ===== QUANTITY CONTROL FIXES ===== */
+.quantity-control {
+    display: inline-flex;
+    align-items: center;
+    background: var(--light);
+    border: 1px solid var(--border-color);
+    border-radius: 50px;
+    padding: 0.25rem;
+    gap: 0.25rem;
+}
+
+.quantity-control .cart-qty-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--text-color);
+    border: none;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.quantity-control .cart-qty-btn:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.quantity-control .cart-qty-input {
+    width: 60px;
+    /* Fixed width prevents column shifting */
+    min-width: 50px;
+    text-align: center;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 1rem;
+    padding: 0.25rem 0;
+    -moz-appearance: textfield;
+    appearance: textfield;
+    font-family: 'Inter', monospace;
+    /* Monospace keeps number width consistent */
+    font-variant-numeric: tabular-nums;
+}
+
+.quantity-control .cart-qty-input::-webkit-outer-spin-button,
+.quantity-control .cart-qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.quantity-control .cart-qty-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary-light);
+    border-radius: 20px;
+}
+
+/* Fixed table column width for quantity */
+.table th:nth-child(3),
+.table td:nth-child(3) {
+    width: 140px;
+    /* Fixed width prevents shift */
+    min-width: 140px;
+    text-align: center;
+}
+
+/* ===== CART TABLE FIXED LAYOUT ===== */
+.table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+/* Fixed column widths */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+    width: 45%;
+    /* Product column */
+}
+
+.table th:nth-child(2),
+.table td:nth-child(2) {
+    width: 12%;
+    /* Price column */
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+    width: 140px;
+    /* Quantity column - fixed width */
+    text-align: center;
+}
+
+.table th:nth-child(4),
+.table td:nth-child(4) {
+    width: 12%;
+    /* Total column */
+}
+
+.table th:nth-child(5),
+.table td:nth-child(5) {
+    width: 60px;
+    /* Actions column */
+}
+
+/* Quantity control stays perfectly centered */
+.quantity-control {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--light);
+    border: 1px solid var(--border-color);
+    border-radius: 50px;
+    padding: 0.25rem;
+    gap: 0.25rem;
+    margin: 0 auto;
+}
+
+.quantity-control .cart-qty-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--text-color);
+    border: none;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.quantity-control .cart-qty-btn:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.quantity-control .cart-qty-input {
+    width: 50px;
+    text-align: center;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 1rem;
+    padding: 0;
+    -moz-appearance: textfield;
+    appearance: textfield;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+
+.quantity-control .cart-qty-input::-webkit-outer-spin-button,
+.quantity-control .cart-qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.quantity-control .cart-qty-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary-light);
+    border-radius: 20px;
+}
+
+/* Ensure table cells don't overflow */
+.table td,
+.table th {
+    word-wrap: break-word;
+    vertical-align: middle;
+}

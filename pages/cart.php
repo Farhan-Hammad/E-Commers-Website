@@ -75,22 +75,21 @@ $isEmpty = $cart->isEmpty();
                                         </td>
                                         <td class="py-4 fw-semibold">$<?= number_format($item['price'], 2) ?></td>
                                         <td class="py-4">
-                                            <div class="d-flex justify-content-center">
-                                                <div class="quantity-control d-flex align-items-center gap-1 rounded-pill p-1"
-                                                    style="background: var(--light); max-width: 140px;">
-                                                    <button class="btn btn-link text-decoration-none cart-qty-btn"
-                                                        data-action="decrease" style="width: 36px; height: 36px;">
-                                                        <i class="fas fa-minus"></i>
-                                                    </button>
-                                                    <input type="number"
-                                                        class="form-control border-0 bg-transparent text-center fw-semibold cart-qty-input"
-                                                        value="<?= $item['quantity'] ?>" min="1" max="<?= $item['stock'] ?>"
-                                                        style="width: 50px; -moz-appearance: textfield;">
-                                                    <button class="btn btn-link text-decoration-none cart-qty-btn"
-                                                        data-action="increase" style="width: 36px; height: 36px;">
-                                                        <i class="fas fa-plus"></i>
-                                                    </button>
-                                                </div>
+                                            <div class="quantity-control">
+                                                <button class="cart-qty-btn" data-action="decrease">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                                <input type="number"
+                                                    class="cart-qty-input"
+                                                    value="<?= $item['quantity'] ?>"
+                                                    min="1"
+                                                    max="<?= $item['stock'] ?>"
+                                                    data-product-id="<?= $item['product_id'] ?>"
+                                                    inputmode="numeric"
+                                                    pattern="[0-9]*">
+                                                <button class="cart-qty-btn" data-action="increase">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
                                             </div>
                                         </td>
                                         <td class="py-4 fw-bold fs-5 item-subtotal">$<?= number_format($item['subtotal'], 2) ?></td>
@@ -214,12 +213,26 @@ $isEmpty = $cart->isEmpty();
         });
 
         document.querySelectorAll('.cart-qty-input').forEach(input => {
-            input.addEventListener('change', async function() {
+            // Handle manual typing (blur event)
+            input.addEventListener('blur', async function() {
                 const row = this.closest('tr');
                 let qty = parseInt(this.value);
-                qty = Math.min(Math.max(qty, 1), parseInt(this.max));
+                const max = parseInt(this.max);
+
+                // Validate
+                if (isNaN(qty) || qty < 1) qty = 1;
+                if (qty > max) qty = max;
+
                 this.value = qty;
                 await updateCartItem(row.dataset.productId, qty);
+            });
+
+            // Handle Enter key
+            input.addEventListener('keypress', async function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.blur();
+                }
             });
         });
 
